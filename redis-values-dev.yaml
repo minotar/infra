@@ -1,0 +1,18 @@
+
+redis:
+  configmap: |
+    maxmemory 50M
+    maxmemory-policy volatile-lfu
+    cluster-require-full-coverage no
+    cluster-allow-reads-when-down yes
+
+  ## Redis(TM) resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources:
+    limits:
+      cpu: 100m
+      memory: 70Mi
+    requests:
+      cpu: 10m
+      memory: 50Mi

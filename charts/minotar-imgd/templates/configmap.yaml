@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: {{ if .Values.secretConfig -}} Secret {{- else -}} ConfigMap {{- end }}
+metadata:
+  name: {{ template "minotar-imgd.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "minotar-imgd.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "minotar-imgd.chart" . }}
+data:
+  config.gcfg: |
+    [server]
+    # Address the server listens on
+    address = 0.0.0.0:8000
+    # Address the profiler listens on
+    profileraddress = 0.0.0.0:8001
+
+    # Log level to use: DEBUG, INFO, NOTICE, WARNING, ERROR, CRITICAL
+    logging = DEBUG
+    # Address to redirect users to upon browsing /
+    url = https://minotar.net/
+    # The duration, in seconds clients should store items in their cache. Default: 48 hrs
+    ttl = 21600
+
+    [minecraft]
+    # User Agent to use with each HTTP request
+    useragent = "minotar/imgd (https://github.com/minotar/imgd)"
+    # SessionServerURL is the address where we can append a UUID and get back a SessionProfileResponse (UUID, Username and Properties/Textures)
+    sessionserverurl = https://sessionserver.mojang.com/session/minecraft/profile/
+    # ProfileURL is the address where we can append a Username and get back a APIProfileResponse (UUID and Username)
+    profileurl = https://api.mojang.com/users/profiles/minecraft/
+
+    # Most important cache Username->UUID (30 day+ TTL preferential)
+    [cache "cacheUUID"]
+    # If using "redis", fill out a [redis "cacheUUID"] section
+    storage = redis-cluster
+    # Size is applicable for Imgd managed storage (eg. memory)
+    size = 32768
+
+    # 2nd Most important cache UUID->UserData
+    [cache "cacheUserData"]
+    # If using "redis", fill out a [redis "cacheUUID"] section
+    storage = redis-cluster
+    # Size is applicable for Imgd managed storage (eg. memory)
+    size = 16384
+
+    # SkinPath->Texture
+    [cache "cacheSkin"]
+    # If using "redis", fill out a [redis "cacheUUID"] section
+    storage = memory
+    # Size is applicable for Imgd managed storage (eg. memory)
+    size = 8192
+
+    # SkinPath->ErrorMsg
+    [cache "cacheSkinTransient"]
+    # If using "redis", fill out a [redis "cacheUUID"] section
+    storage = memory
+    # Size is applicable for Imgd managed storage (eg. memory)
+    size = 256
+
+    [redis  "cacheUUID"]
+    # If you're using Redis caching, you should fill this section out.
+    # Otherwise, don't worry about it
+    address = uuid-cache-redis-cluster:6379
+    # "auth" is optional, it can be left blank if you don't need authentication.
+    #auth =
+    # If you use your Redis for other data it may be useful to further separate it with databases.
+    #db = 0
+    # The number of Redis connections to use. 10 is a good number.
+    #poolSize = 25
+
+    [redis  "cacheUserData"]
+    # If you're using Redis caching, you should fill this section out.
+    # Otherwise, don't worry about it
+    address = userdata-cache-redis-cluster:6379
+    # "auth" is optional, it can be left blank if you don't need authentication.
+    auth =
+    # If you use your Redis for other data it may be useful to further separate it with databases.
+    #db = 0
+    # The number of Redis connections to use. 10 is a good number.
+    #poolSize = 25
+
+    [redis  "cacheSkin"]
+    # If you're using Redis caching, you should fill this section out.
+    # Otherwise, don't worry about it
+    #address = 10.132.2.32:6382
+    # "auth" is optional, it can be left blank if you don't need authentication.
+    #auth =
+    # If you use your Redis for other data it may be useful to further separate it with databases.
+    #db = 0
+    # The number of Redis connections to use. 10 is a good number.
+    #poolSize = 25

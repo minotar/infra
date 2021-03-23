@@ -1,0 +1,18 @@
+{{- if .Values.pspEnabled }}
+apiVersion: {{ template "rbac.apiVersion" . }}
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ include "minotar-imgd.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "minotar-imgd.chart" . }}
+  name: {{ template "minotar-imgd.fullname" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "minotar-imgd.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "minotar-imgd.serviceAccountName" . }}
+{{- end -}}

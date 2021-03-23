@@ -1,0 +1,9 @@
+image:
+  repository: minotar/imgd
+  tag: develop
+
+pspEnabled: false
+
+
+serviceMonitor:
+  enabled: true

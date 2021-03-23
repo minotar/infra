@@ -1,0 +1,13 @@
+apiVersion: v1
+description: Minotar's imgd Service
+name: minotar-imgd
+version: 1.0.0
+appVersion: 3.0.0
+home: https://github.com/minotar
+sources:
+  - https://github.com/minotar
+keywords:
+  - minotar
+  - imgd
+maintainers:
+  - name: LukeH

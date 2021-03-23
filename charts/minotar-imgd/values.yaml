@@ -1,0 +1,183 @@
+restartPolicy: Always
+
+kind: Deployment
+
+podDisruptionBudget: {}
+  # maxUnavailable: 0
+
+## Additional imgd container environment variables
+## For instance to add a http_proxy
+##
+## extraEnv:
+##   HTTP_PROXY: "http://superproxy.com:3128"
+##   NO_PROXY: "localhost,127.0.0.1"
+extraEnv: {}
+
+extraContainers: []
+  # - name: oAuth2-proxy
+  #   args:
+  #     - -https-address=:9116
+  #     - -upstream=http://localhost:9115
+  #     - -skip-auth-regex=^/metrics
+  #     - -openshift-delegate-urls={"/":{"group":"monitoring.coreos.com","resource":"prometheuses","verb":"get"}}
+  #   image: openshift/oauth-proxy:v1.1.0
+  #   ports:
+  #       - containerPort: 9116
+  #         name: proxy
+  #   resources:
+  #       limits:
+  #         memory: 16Mi
+  #       requests:
+  #         memory: 4Mi
+  #         cpu: 20m
+  #   volumeMounts:
+  #     - mountPath: /etc/prometheus/secrets/blackbox-tls
+  #       name: secret-blackbox-tls
+
+## Enable pod security policy
+pspEnabled: true
+
+strategy:
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+  type: RollingUpdate
+
+image:
+  repository: minotar/imgd
+  tag: develop
+  #pullPolicy: IfNotPresent
+  pullPolicy: Always
+
+
+## User to run imgd container as
+runAsUser: 1000
+readOnlyRootFilesystem: true
+runAsNonRoot: true
+
+
+livenessProbe:
+  httpGet:
+    path: /stats
+    port: http
+
+readinessProbe:
+  httpGet:
+    path: /stats
+    port: http
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# if the configuration is managed as secret outside the chart, using SealedSecret for example,
+# provide the name of the secret here. If secretConfig is set to true, configExistingSecretName will be ignored
+# in favor of the config value.
+configExistingSecretName: ""
+# Store the configuration as a `Secret` instead of a `ConfigMap`, useful in case it contains sensitive data
+secretConfig: false
+config:
+
+## Additional secret mounts
+# Defines additional mounts with secrets. Secrets must be manually created in the namespace.
+extraSecretMounts: []
+  # - name: secret-files
+  #   mountPath: /etc/secrets
+  #   secretName: blackbox-secret-files
+  #   readOnly: true
+  #   defaultMode: 420
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 120Mi
+  requests:
+    cpu: 300m
+    memory: 75Mi
+
+priorityClassName: ""
+
+service:
+  annotations: {}
+  labels: {}
+  type: ClusterIP
+  port: 8000
+  debugPort: 8001
+
+# Only changes container port. Application port can be changed with extraArgs (--web.listen-address=:9115)
+# https://github.com/prometheus/blackbox_exporter/blob/998037b5b40c1de5fee348ffdea8820509d85171/main.go#L55
+containerPort: 8000
+containerDebugPort: 8001
+
+serviceAccount:
+  # Specifies whether a ServiceAccount should be created
+  create: true
+  # The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+  annotations: {}
+
+## An Ingress resource can provide name-based virtual hosting and TLS
+## termination among other things for CouchDB deployments which are accessed
+## from outside the Kubernetes cluster.
+## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  enabled: false
+  hosts: []
+     # - chart-example.local
+  path: '/'
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  tls: []
+    # Secrets must be manually created in the namespace.
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
+
+podAnnotations: {}
+
+pod:
+  labels: {}
+
+replicas: 2
+
+serviceMonitor:
+  ## If true, a ServiceMonitor CRD is created for a prometheus operator
+  ## https://github.com/coreos/prometheus-operator
+  ##
+  enabled: false
+
+  selector:
+    release: prometheus
+  additionalMetricsRelabels: {}
+  interval: 30s
+  scrapeTimeout: 30s
+  ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
+  scheme: http
+  ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
+  ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
+  tlsConfig: {}
+  bearerTokenFile:
+
+## Custom PrometheusRules to be defined
+## ref: https://github.com/coreos/prometheus-operator#customresourcedefinitions
+prometheusRule:
+  enabled: false
+  additionalLabels: {}
+  namespace: ""
+  rules: []
+
+## Network policy for chart
+networkPolicy:
+  # Enable network policy and allow access from anywhere
+  enabled: false
+  # Limit access only from monitoring namespace
+  # Before setting this value to true, you must add the name=monitoring label to the monitoring namespace
+  # Network Policy uses label filtering
+  allowMonitoringNamespace: false
+
+## dnsPolicy and dnsConfig for Deployments and Daemonsets if you want non-default settings.
+## These will be passed directly to the PodSpec of same.
+dnsPolicy:
+dnsConfig:
