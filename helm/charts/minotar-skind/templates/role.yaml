@@ -1,0 +1,20 @@
+{{- if .Values.pspEnabled }}
+apiVersion: {{ template "rbac.apiVersion" . }}
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ include "minotar-skind.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "minotar-skind.chart" . }}
+  name: {{ template "minotar-skind.fullname" . }}
+rules:
+  - apiGroups:
+    - policy
+    resources:
+    - podsecuritypolicies
+    resourceNames:
+    - {{ template "minotar-skind.fullname" . }}-psp
+    verbs:
+    - use
+{{- end -}}

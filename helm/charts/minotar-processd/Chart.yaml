@@ -1,6 +1,6 @@
 apiVersion: v1
-description: Minotar's imgd Service (single binary for skind + processd)
-name: minotar-imgd
+description: Minotar's processd Service
+name: minotar-processd
 version: 1.0.0
 appVersion: 4.0.0
 home: https://github.com/minotar
@@ -8,6 +8,6 @@ sources:
   - https://github.com/minotar/imgd
 keywords:
   - minotar
-  - imgd
+  - processd
 maintainers:
   - name: LukeH

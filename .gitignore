@@ -1,5 +1,6 @@
 
 .envrc
+helm/mcclient-values.yaml
 
 # Local .terraform directories
 **/.terraform/*

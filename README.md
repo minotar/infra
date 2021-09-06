@@ -23,19 +23,40 @@ While terraform has the kubeconfig, it's easiest to just use `doctl` (as you sho
 doctl kubernetes cluster kubeconfig save minotar-k8s
 ```
 
+Create an imgd namespace for our associated services
+
+```
+kubectl create namespace imgd
+```
+
 
 ## Helm
 
-
+Set your extra mcclient vars `helm/mcclient-values.yaml`
 
 ### Install
+
+skind:
 ```
-helm install imgd helm/charts/minotar-imgd --values helm/minotar-imgd-values.yaml
+helm install skind helm/charts/minotar-skind --namespace imgd --values helm/minotar-skind-values.yaml --values helm/mcclient-values.yaml
+```
+
+processd:
+```
+helm install processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
 ```
 
 ### Upgrade
+
+skind:
 ```
-helm upgrade imgd helm/charts/minotar-imgd --values helm/minotar-imgd-values.yaml
+helm upgrade skind helm/charts/minotar-skind --namespace imgd --values helm/minotar-skind-values.yaml --values helm/mcclient-values.yaml
+```
+
+processd:
+```
+helm upgrade processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
+
 ```
 
 

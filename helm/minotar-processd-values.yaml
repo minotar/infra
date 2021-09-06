@@ -1,0 +1,9 @@
+
+
+skindURL: http://skind-minotar-skind.imgd/skin/
+
+pspEnabled: false
+
+
+serviceMonitor:
+  enabled: false

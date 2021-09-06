@@ -1,16 +1,16 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ template "minotar-imgd.fullname" . }}
+  name: {{ template "minotar-processd.fullname" . }}
   {{- if .Values.service.annotations }}
   annotations:
 {{ toYaml .Values.service.annotations | indent 4 }}
 {{- end }}
   labels:
-    app.kubernetes.io/name: {{ include "minotar-imgd.name" . }}
+    app.kubernetes.io/name: {{ include "minotar-processd.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    helm.sh/chart: {{ include "minotar-imgd.chart" . }}
+    helm.sh/chart: {{ include "minotar-processd.chart" . }}
 {{- if .Values.service.labels }}
 {{ toYaml .Values.service.labels | indent 4 }}
 {{- end }}
@@ -26,5 +26,5 @@ spec:
 {{ toYaml .Values.service.externalIPs | indent 4 }}
 {{- end }}
   selector:
-    app.kubernetes.io/name: {{ include "minotar-imgd.name" . }}
+    app.kubernetes.io/name: {{ include "minotar-processd.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
