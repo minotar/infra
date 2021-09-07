@@ -6,8 +6,8 @@ image:
   tag: "stable"
 
 
-nameOverride: "skind-cache"
-fullnameOverride: "skind-varnish-httpcache"
+nameOverride: "frontend-cache"
+fullnameOverride: "frontend-varnish-httpcache"
 
 # Enable StatefulSet (Deployment is default)
 useStatefulset:
@@ -23,17 +23,18 @@ cache:
   # name of frontend service
   # frontendService: kube-httpcache-headless
   # name of backend service
-  backendService: skind-minotar-skind
+  backendService: processd-minotar-processd
   # name of backend service namespace
   # backendServiceNamespace: backend-service-namespace
   # watching for frontend changes is true by default
   frontendWatch: true
   # watching for backend changes is true by default
-  backendWatch: true
+  # We don't care about the backends as they are already managed by a Varnish STS
+  backendWatch: false
   # Varnish storage backend type (https://varnish-cache.org/docs/trunk/users-guide/storage-backends.html)
   varnishStorage: malloc # default,malloc,umem,file...
   # Varnish storage backend size
-  storageSize: 64M # K(ibibytes), M(ebibytes), G(ibibytes), T(ebibytes) ... unlimited
+  storageSize: 128M # K(ibibytes), M(ebibytes), G(ibibytes), T(ebibytes) ... unlimited
   # Varnish transient storage backend type (https://varnish-cache.org/docs/trunk/users-guide/storage-backends.html)
   varnishTransientStorage: malloc
   # Varnish transient storage backend size
@@ -94,12 +95,20 @@ vclTemplate: |
   }
   {{- end }}
 
-  {{ range .Backends }}
-  backend be-{{ .Name }} {
-      .host = "{{ .Host }}";
-      .port = "{{ .Port }}";
+  backend svc-processd-minotar-processd {
+      .host = "processd-minotar-processd";
+      .port = "80";
   }
-  {{- end }}
+
+  backend svc-skind-varnish-httpcache {
+      .host = "skind-varnish-httpcache";
+      .port = "80";
+  }
+
+  backend svc-frontend-website {
+      .host = "localhost";
+      .port = "9999";
+  }
 
   sub vcl_init {
       new cluster = directors.hash();
@@ -107,20 +116,14 @@ vclTemplate: |
       {{ range .Frontends -}}
       cluster.add_backend({{ .Name }}, 1);
       {{ end }}
-
-      new lb = directors.hash();
-
-      {{ range .Backends -}}
-      lb.add_backend(be-{{ .Name }}, 1);
-      {{ end }}
-
   }
 
   sub sanitize_incoming
   {
-      # Non-skind paths are dropped
-      if (req.url !~ "^/skin/" && req.url !~ "^/download/") {
-        return(synth(403));
+
+      # If not for the server_name && not the server_name redirect then we can drop it.
+      if (req.http.host != "minotar.net" && req.http.host != "minotar.net:80" && req.http.host != "www.minotar.net") {
+        return (synth(403, "Forbidden"));
       }
 
       # Let's remove all query strings, ampersands and hashes
@@ -131,30 +134,60 @@ vclTemplate: |
 
       # Remove all cookies
       unset req.http.cookie;
+
   }
 
   sub vcl_recv
   {
-      # Set backend hint for non cachable objects.
-      set req.backend_hint = lb.backend(req.url);
+      # Default everything to primary backend
+      set req.backend_hint = svc-processd-minotar-processd;
 
       call sanitize_incoming;
 
-      # Remove the resource type from the URL for calculating the hash
-      # (eg. so hash is only from Username/UUID so we always query same skind)
-      set req.http.X-Req-Hash = regsub(req.url, "/(skin|download)", "");
+      # Redirect www to no-www and keep the URI
+      if (req.http.host == "www.minotar.net") {
+        # Handle HTTP/S by looking for the X-Forwarded-Proto header.
+        if (req.http.x-forwarded-proto == "https") {
+            return (synth(720, "https://minotar.net" + req.url));
+        } else {
+            return (synth(720, "http://minotar.net" + req.url));
+        }
+      }
 
-      # Routing logic. Pass a request to an appropriate Varnish node.
+      if (req.url == "/webhook/github") {
+        set req.backend_hint = svc-frontend-website;
+        return (pass);
+      }
+
+      # Only deal with GET and HEAD, 405 if not
+      if (req.method != "GET" &&
+          req.method != "HEAD") {
+        return (synth(405, "GET, HEAD"));
+      }
+
+      if (req.url == "/" || req.url == "/favicon.ico" || req.url == "/robots.txt" || req.url == "/404.html" || req.url ~ "^/assets/" || req.url ~ "^/addons/") {
+        set req.backend_hint = svc-frontend-website;
+        return (pass);
+      }
+
+      if (req.url ~ "^/skin/" || req.url ~ "^/download/") {
+        set req.backend_hint = svc-skind-varnish-httpcache;
+        return(pass);
+      }
+
+      # Sharded Varnish Routing logic. Pass a request to an appropriate Varnish node.
       # See https://info.varnish-software.com/blog/creating-self-routing-varnish-cluster for more info.
       unset req.http.x-cache;
-      set req.backend_hint = cluster.backend(req.http.X-Req-Hash);
+      set req.backend_hint = cluster.backend(req.url);
       set req.http.x-shard = req.backend_hint;
       if (req.http.x-shard != server.identity) {
           return(pass);
       }
 
       ## Request was meant for this Varnish shard
-      set req.backend_hint = lb.backend(req.http.X-Req-Hash);
+
+      # Must be processd URL
+      set req.backend_hint = svc-processd-minotar-processd;
 
       return(hash);
   }
@@ -174,6 +207,19 @@ vclTemplate: |
         set beresp.http.X-Backend = beresp.backend.name;
       }
 
+      # How many attempts it took to get the resource
+      if (bereq.retries > 0) {
+        set beresp.http.X-Attempts = bereq.retries + 1;
+      }
+
+      # Set 2min cache if unset for static files
+      if (beresp.ttl <= 0s || beresp.http.Vary == "*") {
+        set beresp.ttl = 120s; # Important, you shouldn't rely on this, SET YOUR HEADERS in the backend
+        # The uncacheable header tells Varnish to keep a record that we should not cache this request and we should go to backend.
+        #set beresp.uncacheable = true;
+        return (deliver);
+      }
+
       # Allow stale content, in case the backend goes down.
       # make Varnish keep all objects for 1.5 hours beyond their TTL
       set beresp.grace = 30m;
@@ -183,13 +229,42 @@ vclTemplate: |
       return (deliver);
   }
 
+  # If things go wrong on request to the backend
+  sub vcl_backend_error
+  {
+      set beresp.http.X-Attempts = bereq.retries + 1;
+
+      if (beresp.status == 503 && bereq.retries < 4) {
+        return (retry);
+      }
+
+
+      # At this point we have tried 5 times to hit the backend and sill failed :(
+      set beresp.http.Content-Type = "text/html; charset=utf-8";
+      set beresp.http.Retry-After = "5";
+      synthetic( {"<!DOCTYPE html>
+    <html>
+      <head>
+        <title>"} + beresp.status + " " + beresp.reason + {"</title>
+      </head>
+      <body>
+        <h1>Error "} + beresp.status + " " + beresp.reason + {"</h1>
+        <p>"} + beresp.reason + {"</p>
+        <h3>Guru Minotation:</h3>
+        <p>XID: "} + bereq.xid + {"</p>
+        <hr>
+        <p>Varnish cache server</p>
+      </body>
+    </html>
+    "} );
+      return (deliver);
+  }
+
   sub vcl_deliver
   {
       # Called before a cached object is delivered to the client.
 
       # Set debug info headers
-      set resp.http.X-Req-Hash = req.http.X-Req-Hash;
-
       set resp.http.X-Varnish-Server = server.identity;
 
       # Only add the object headers when it was served by this shard
@@ -212,6 +287,27 @@ vclTemplate: |
 
       call header_cleanup;
   }
+
+  sub vcl_synth
+  {
+      if (resp.status == 720) {
+        # We use this special error status 720 to force redirects with 301 (permanent) redirects
+        # To use this, call the following from anywhere in vcl_recv: return (synth(720, "http://host/new.html"));
+        set resp.http.Location = resp.reason;
+        set resp.status = 301;
+      } elseif (resp.status == 721) {
+        # And we use error status 721 to force redirects with a 302 (temporary) redirect
+        # To use this, call the following from anywhere in vcl_recv: return (synth(720, "http://host/new.html"));
+        set resp.http.Location = resp.reason;
+        set resp.status = 302;
+      } elseif (resp.status == 405) {
+        set resp.http.Allow = resp.reason;
+        set resp.status = 405;
+      }
+
+      call header_cleanup;
+  }
+
 
   # Header cleanup and removal for headers which we don't want making it to the clients.
   sub header_cleanup
