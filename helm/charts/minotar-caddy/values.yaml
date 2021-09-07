@@ -1,3 +1,8 @@
+
+gitSync:
+  enabled: false
+  repo:
+
 restartPolicy: Always
 
 ## Additional imgd container environment variables
@@ -17,16 +22,15 @@ strategy:
     maxUnavailable: 1
   type: RollingUpdate
 
-skindURL: https://minotar.net/skin/
 
 image:
-  repository: minotar/processd
-  tag: version4-25d2eaf
+  repository: caddy
+  tag: 2.4.3-alpine
   #pullPolicy: IfNotPresent
   pullPolicy: Always
 
 
-## User to run processd container as
+## User to run caddy container as
 runAsUser: 10001
 readOnlyRootFilesystem: true
 runAsNonRoot: true
@@ -34,21 +38,25 @@ runAsNonRoot: true
 
 livenessProbe:
   httpGet:
-    path: /metrics
+    path: /
     port: http
+  initialDelaySeconds: 5
+  periodSeconds: 15
 
 readinessProbe:
   httpGet:
-    path: /metrics
+    path: /
     port: http
+  initialDelaySeconds: 30
+  periodSeconds: 15
 
 
 resources:
   limits:
-    cpu: 600m
+    cpu: 200m
     memory: 50Mi
   requests:
-    cpu: 300m
+    cpu: 50m
     memory: 20Mi
 
 
@@ -67,6 +75,7 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
   annotations: {}
+
 
 podAnnotations: {}
 
@@ -109,3 +118,9 @@ networkPolicy:
   # Before setting this value to true, you must add the name=monitoring label to the monitoring namespace
   # Network Policy uses label filtering
   allowMonitoringNamespace: false
+
+caddyConfig: |
+  :8080 {
+    # root /srv/www
+    respond "Hello, world!"
+  }

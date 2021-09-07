@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "minotar-caddy.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "minotar-caddy.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "minotar-caddy.chart" . }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "minotar-caddy.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+{{ toYaml .Values.strategy | indent 4 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "minotar-caddy.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ include "minotar-caddy.chart" . }}
+        {{- if .Values.pod.labels }}
+{{ toYaml .Values.pod.labels | indent 8 }}
+        {{- end }}
+      annotations:
+        {{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ template "minotar-caddy.serviceAccountName" . }}
+
+      restartPolicy: {{ .Values.restartPolicy }}
+
+      containers:
+        {{- if .Values.gitSync.enabled }}
+        - name: git-sync
+          image: minotar/git-sync@sha256:32da6a78d93673eac31805efb8000c62a7d95bb9902e716c113a7ce3ba7f1669
+          imagePullPolicy: IfNotPresent
+          args:
+            - --repo={{ .Values.gitSync.repo }}
+            - --root=/srv/www
+            - --wait=30
+            - --http-bind=0.0.0.0:7080
+          ports:
+            - containerPort: 7080
+              name: healthcheck
+          livenessProbe:
+            httpGet:
+              path: /
+              port: healthcheck
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: healthcheck
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          volumeMounts:
+            - name: site-data
+              mountPath: /srv/www
+        {{- end }}
+        - name: caddy
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - caddy
+            - run
+            - --config=/etc/caddy/Caddyfile
+            - --adapter=caddyfile
+            - --watch
+          securityContext:
+            readOnlyRootFilesystem: {{ .Values.readOnlyRootFilesystem }}
+            runAsNonRoot: {{ .Values.runAsNonRoot  }}
+            runAsUser: {{ .Values.runAsUser }}
+          env:
+          {{- range $key, $value := .Values.extraEnv }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+              name: http
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | trim | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | trim | nindent 12 }}
+
+          volumeMounts:
+            - name: config
+              mountPath: /etc/caddy
+              readOnly: true
+            - name: site-data
+              mountPath: /srv/www
+              readOnly: true
+
+      volumes:
+        - name: config
+          configMap:
+            name: {{ template "minotar-caddy.fullname" . }}
+        - name: site-data
+          emptyDir: {}

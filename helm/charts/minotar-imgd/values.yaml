@@ -71,24 +71,6 @@ serviceAccount:
   name:
   annotations: {}
 
-## An Ingress resource can provide name-based virtual hosting and TLS
-## termination among other things for CouchDB deployments which are accessed
-## from outside the Kubernetes cluster.
-## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
-ingress:
-  enabled: false
-  hosts: []
-     # - chart-example.local
-  path: '/'
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  tls: []
-    # Secrets must be manually created in the namespace.
-    # - secretName: chart-example-tls
-    #   hosts:
-    #     - chart-example.local
-
 podAnnotations: {}
 
 pod:

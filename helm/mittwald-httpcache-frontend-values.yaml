@@ -105,9 +105,9 @@ vclTemplate: |
       .port = "80";
   }
 
-  backend svc-frontend-website {
-      .host = "localhost";
-      .port = "9999";
+  backend svc-frontend-website-minotar-caddy {
+      .host = "frontend-website-minotar-caddy";
+      .port = "80";
   }
 
   sub vcl_init {
@@ -155,7 +155,7 @@ vclTemplate: |
       }
 
       if (req.url == "/webhook/github") {
-        set req.backend_hint = svc-frontend-website;
+        set req.backend_hint = svc-frontend-website-minotar-caddy;
         return (pass);
       }
 
@@ -166,7 +166,7 @@ vclTemplate: |
       }
 
       if (req.url == "/" || req.url == "/favicon.ico" || req.url == "/robots.txt" || req.url == "/404.html" || req.url ~ "^/assets/" || req.url ~ "^/addons/") {
-        set req.backend_hint = svc-frontend-website;
+        set req.backend_hint = svc-frontend-website-minotar-caddy;
         return (pass);
       }
 

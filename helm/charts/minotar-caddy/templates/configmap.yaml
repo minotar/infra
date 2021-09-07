@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "minotar-caddy.fullname" . }}
+data:
+  Caddyfile: |
+{{ .Values.caddyConfig | indent 4}}

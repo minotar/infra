@@ -36,6 +36,11 @@ Set your extra mcclient vars `helm/mcclient-values.yaml`
 
 ### Install
 
+Minotar website via Caddy:
+```
+helm install frontend-website helm/charts/minotar-caddy --namespace imgd --values helm/minotar-caddy-values.yaml
+```
+
 skind:
 ```
 helm install skind helm/charts/minotar-skind --namespace imgd --values helm/minotar-skind-values.yaml --values helm/mcclient-values.yaml
@@ -60,6 +65,11 @@ helm install frontend-varnish helm/charts/mittwald-httpcache/chart --namespace i
 
 
 ### Upgrade
+
+Minotar website via Caddy:
+```
+helm upgrade frontend-website helm/charts/minotar-caddy --namespace imgd --values helm/minotar-caddy-values.yaml
+```
 
 skind:
 ```
