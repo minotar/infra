@@ -41,6 +41,11 @@ skind:
 helm install skind helm/charts/minotar-skind --namespace imgd --values helm/minotar-skind-values.yaml --values helm/mcclient-values.yaml
 ```
 
+skind Varnish / "mittwald-httpcache":
+```
+helm install varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-skind-values.yaml
+```
+
 processd:
 ```
 helm install processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
@@ -53,10 +58,14 @@ skind:
 helm upgrade skind helm/charts/minotar-skind --namespace imgd --values helm/minotar-skind-values.yaml --values helm/mcclient-values.yaml
 ```
 
+skind Varnish / "mittwald-httpcache":
+```
+helm upgrade varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-skind-values.yaml
+```
+
 processd:
 ```
 helm upgrade processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
-
 ```
 
 
