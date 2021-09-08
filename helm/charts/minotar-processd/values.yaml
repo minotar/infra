@@ -1,3 +1,13 @@
+
+
+skindURL: https://minotar.net/skin/
+
+image:
+  repository: minotar/processd
+  tag: version4-e29acd7
+  #pullPolicy: IfNotPresent
+  pullPolicy: Always
+
 restartPolicy: Always
 
 ## Additional imgd container environment variables
@@ -17,15 +27,6 @@ strategy:
     maxUnavailable: 1
   type: RollingUpdate
 
-skindURL: https://minotar.net/skin/
-
-image:
-  repository: minotar/processd
-  tag: version4-25d2eaf
-  #pullPolicy: IfNotPresent
-  pullPolicy: Always
-
-
 ## User to run processd container as
 runAsUser: 10001
 readOnlyRootFilesystem: true
@@ -34,12 +35,12 @@ runAsNonRoot: true
 
 livenessProbe:
   httpGet:
-    path: /metrics
+    path: /healthcheck
     port: http
 
 readinessProbe:
   httpGet:
-    path: /metrics
+    path: /healthcheck
     port: http
 
 
