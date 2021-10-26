@@ -36,6 +36,14 @@ Set your extra mcclient vars `helm/mcclient-values.yaml`
 
 ### Install
 
+#### Monitoring
+
+```
+helm install metrics-server bitnami/metrics-server --namespace kube-system --values helm/bitnami-metrics-server-values.yaml
+```
+
+#### App
+
 Minotar website via Caddy:
 ```
 helm install frontend-website helm/charts/minotar-caddy --namespace imgd --values helm/minotar-caddy-values.yaml

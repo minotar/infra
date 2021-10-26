@@ -37,19 +37,19 @@ runAsNonRoot: true
 
 livenessProbe:
   httpGet:
-    path: /healthcheck
+    path: /dbsize
     port: http
 
 readinessProbe:
   httpGet:
-    path: /healthcheck
+    path: /dbsize
     port: http
 
 
 resources:
-  limits:
-    cpu: 250m
-    memory: 120Mi
+#  limits:
+#    cpu: 250m
+#    memory: 120Mi
   requests:
     cpu: 100m
     memory: 100Mi

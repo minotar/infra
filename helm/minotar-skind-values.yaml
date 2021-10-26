@@ -4,6 +4,11 @@ mcclient:
   sessionServerURL: https://sessionserver.mojang.com/session/minecraft/profile/
   profileURL: https://api.mojang.com/users/profiles/minecraft/
 
+
+resources:
+  limits:
+    memory: 500Mi
+
 pspEnabled: false
 
 

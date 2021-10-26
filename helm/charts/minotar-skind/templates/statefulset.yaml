@@ -62,8 +62,8 @@ spec:
           args:
           - --server.http-listen-port={{ .Values.containerPort }}
           - --cache.uuid.bolt-path=/skind/bolt_cache_uuid.db
-          - --cache.userdata.bolt-path=/skind/bolt_cache_usertdata.db
-          - --cache.textures.bolt-path=/skind/bolt_cache_textures.db
+          - --cache.userdata.bolt-path=/skind/bolt_cache_userdata.db
+          - --cache.textures.bolt-path=/ephemeral-cache/bolt_cache_textures.db
           - --mcclient.useragent={{ .Values.mcclient.userAgent }}
           - --mcclient.sessionserver-url={{ .Values.mcclient.sessionServerURL }}
           - --mcclient.profile-url={{ .Values.mcclient.profileURL }}
@@ -84,6 +84,8 @@ spec:
           volumeMounts:
           - mountPath: "/skind"
             name: bolt-cache-pvc
+          - name: ephemeral-cache
+            mountPath: /ephemeral-cache
 
       initContainers:
         - name: skind-data-permission-fix
@@ -93,6 +95,10 @@ spec:
           - name: bolt-cache-pvc
             mountPath: /skind
 
+      volumes:
+        - name: ephemeral-cache
+          emptyDir: {}
+
   volumeClaimTemplates:
   - metadata:
       name: bolt-cache-pvc
@@ -101,5 +107,5 @@ spec:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 5Gi
+          storage: 10Gi
       storageClassName: do-block-storage
