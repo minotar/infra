@@ -1,0 +1,42 @@
+---
+
+- name: install required grafana packages
+  apt:
+    pkg:
+      - adduser
+      - libfontconfig1
+    state: present
+    update_cache: yes
+
+- name: install grafana
+  apt:
+    deb: https://dl.grafana.com/oss/release/grafana_{{ grafana_version }}_amd64.deb
+  notify:
+    # The deb technically already restarts grafana and triggers the systemd reload
+    - restart grafana
+
+- name: start/enable grafana service
+  service: name=grafana-server.service state=started enabled=yes
+
+- name: check if grafana is accessible.
+  uri:
+    url: http://{{ inventory_hostname }}:3000
+    method: GET
+    status_code: 200
+
+- name: configure caddy for grafana
+  include_role:
+    name: caddy
+    apply:
+      tags:
+        - caddy
+    tasks_from: add_site
+    public: no
+  vars:
+    t_caddy_site_name: grafana
+    t_caddy_site_host: "grafana.{{ inventory_hostname }}"
+    t_caddy_site_default_settings: true
+    t_caddy_site_secure_headers: true
+    t_caddy_site_reverse_proxy: "localhost:3000"
+  tags:
+    - caddy

@@ -1,0 +1,12 @@
+---
+
+skind_servers:
+
+  - host: node1:4643
+    instance: skind-0
+
+  - host: node2:4643
+    instance: skind-1
+
+prometheus_extra_conf: |
+  # Extra conf

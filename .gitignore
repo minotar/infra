@@ -1,6 +1,7 @@
 
 .envrc
 helm/mcclient-values.yaml
+ansible/custom-vars.yml
 
 # Local .terraform directories
 **/.terraform/*

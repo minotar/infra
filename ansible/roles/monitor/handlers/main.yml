@@ -1,0 +1,22 @@
+---
+
+- name: restart grafana
+  become: yes
+  systemd:
+    name: grafana-server
+    daemon_reload: yes
+    state: restarted
+
+- name: restart prometheus
+  become: yes
+  systemd:
+    name: prometheus
+    daemon_reload: yes
+    state: restarted
+
+- name: restart blackbox_exporter
+  become: yes
+  systemd:
+    name: blackbox_exporter
+    daemon_reload: yes
+    state: restarted

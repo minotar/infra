@@ -1,0 +1,22 @@
+[Unit]
+Description={{ node_exporter_service_name }}
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ node_exporter_user_name }}
+Group={{ node_exporter_group_name }}
+Restart=on-failure
+Type=simple
+ExecStart={{ local_bin_path }}/node_exporter                \
+                               --no-collector.bonding       \
+                               --no-collector.fibrechannel  \
+                               --no-collector.infiniband    \
+                               --no-collector.ipvs          \
+                               --no-collector.nfs           \
+                               --no-collector.nfsd          \
+                               --no-collector.zfs           \
+                               --collector.processes
+
+[Install]
+WantedBy=multi-user.target

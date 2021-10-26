@@ -1,0 +1,11 @@
+
+- name: monitoring server
+  hosts: monitoring
+  roles:
+    - caddy
+    - monitor
+
+- name: monitoring clients
+  hosts: all
+  roles:
+    - prometheus-node-exporter

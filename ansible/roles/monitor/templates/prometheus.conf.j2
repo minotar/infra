@@ -1,0 +1,57 @@
+#
+# Label standards:
+#   instance - hostname of the node (no port/scheme/URL path)
+#   app - matches the loki label configs (job labels there are different)
+#   job - corresponds to the scrape config (often, but not always the same as app)
+#
+
+global:
+  scrape_interval: 15s
+
+rule_files:
+  # - "first.rules"
+  # - "second.rules"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 30s
+    metric_relabel_configs:
+      # Drop metrics for irrelevant k8 series' which is currently unused by prometheus (always 0)
+      - source_labels: [__name__]
+        regex: '^(prometheus_sd_kubernetes).*'
+        action: drop
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          app: prometheus
+          instance: {{ inventory_hostname }}
+
+  - job_name: 'grafana-server'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['localhost:3000']
+        labels:
+          app: grafana-server
+          instance: {{ inventory_hostname }}
+
+  - job_name: 'node_exporter'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['localhost:9100']
+        labels:
+          instance: {{ inventory_hostname }}
+
+  - job_name: 'skind'
+    scrape_interval: 5s
+    static_configs:
+{% for item in skind_servers %}
+      - targets: ['{{ item.host }}']
+        labels:
+          app: skind
+          instance: {{ item.instance }}
+{% endfor %}
+
+{%- if prometheus_extra_conf is defined %}
+  {{ prometheus_extra_conf|indent(2) }}
+{% endif %}
+

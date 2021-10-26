@@ -1,0 +1,16 @@
+---
+
+- include: grafana.yml
+  become: yes
+  tags:
+    - grafana
+
+- include: prometheus.yml
+  become: yes
+  tags:
+    - prometheus
+
+- include: blackbox_exporter.yml
+  become: yes
+  tags:
+    - blackbox_exporter
