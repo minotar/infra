@@ -1,0 +1,36 @@
+#cloud-config
+# Add groups to the system
+groups:
+  - lukeh
+  - clone1018
+
+# Add users to the system. Users are added after groups are added.
+users:
+
+  - name: lukeh
+    gecos: LukeH
+    shell: /bin/bash
+    primary_group: lukeh
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: users, admin
+    lock_passwd: false
+    ssh_authorized_keys:
+      - ${lukeh_ssh_1}
+      - ${lukeh_ssh_2}
+      - ${lukeh_ssh_3}
+    # Add any extra keys from GitHub
+    ssh-import-id: gh:LukeHandle
+
+  - name: clone1018
+    gecos: LukeS
+    shell: /bin/bash
+    primary_group: clone1018
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: users, admin
+    lock_passwd: false
+    ssh_authorized_keys:
+      - ${lukes_ssh_1}
+    # Add any extra keys from GitHub
+    ssh-import-id: gh:clone1018
+
+disable_root: true
