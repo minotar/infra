@@ -42,6 +42,14 @@ Set your extra mcclient vars `helm/mcclient-values.yaml`
 helm install metrics-server bitnami/metrics-server --namespace kube-system --values helm/bitnami-metrics-server-values.yaml
 ```
 
+
+```
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --create-namespace --namespace kube-prometheus-stack --values helm/kube-prometheus-stack-values.yaml
+
+```
+
 #### App
 
 Minotar website via Caddy:

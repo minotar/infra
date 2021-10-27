@@ -7,9 +7,13 @@ terraform-init:
 terraform-apply:
 	terraform -chdir=terraform/ apply
 
+
 ## ansible
 
 ansible-deploy:
+	ansible-playbook -i ansible/hosts -e @ansible/custom-vars.yml ansible/playbook.yml
+
+ansible-check:
 	ansible-playbook -i ansible/hosts -e @ansible/custom-vars.yml ansible/playbook.yml
 
 
