@@ -1,6 +1,6 @@
 resource "digitalocean_droplet" "monitoring" {
   image              = "ubuntu-20-04-x64"
-  name               = "monitoring.minotar.net"
+  name               = "monitoring.cluster.minotar.net"
   region             = var.minotar_digitalocean_region
   size               = "s-1vcpu-1gb"
   ipv6               = true

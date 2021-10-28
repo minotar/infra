@@ -6,3 +6,6 @@ resource "digitalocean_tag" "monitoring_nodes" {
   }
 }
 
+resource "digitalocean_tag" "minotar_prod" {
+  name = "k8s-prod"
+}

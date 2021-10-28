@@ -1,7 +1,7 @@
 
 
 [monitoring]
-147.182.190.99 inventory_hostname=monitoring.minotar.net create_hostname_site=False
+monitoring.cluster.minotar.net
 
 
 [all:vars]
