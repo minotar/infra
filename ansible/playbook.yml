@@ -1,4 +1,9 @@
 
+- name: set hostnames
+  hosts: all
+  roles:
+    - hostname
+
 - name: monitoring server
   hosts: monitoring
   roles:

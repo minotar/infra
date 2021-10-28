@@ -1,0 +1,8 @@
+---
+
+- name: set hostname
+  become: yes
+  hostname:
+    name: "{{ inventory_hostname }}"
+  tags:
+    - hostname
