@@ -86,10 +86,10 @@ serviceMonitor:
   enabled: false
 
   selector:
-    release: prometheus
+    release: kube-prometheus-stack
   additionalMetricsRelabels: {}
   interval: 30s
-  scrapeTimeout: 30s
+  scrapeTimeout: 10s
   ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
   scheme: http
   ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.

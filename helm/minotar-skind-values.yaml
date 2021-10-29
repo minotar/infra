@@ -1,10 +1,4 @@
 
-mcclient:
-  userAgent: minotar/imgd (https://github.com/minotar/imgd) - k8
-  sessionServerURL: https://sessionserver.mojang.com/session/minecraft/profile/
-  profileURL: https://api.mojang.com/users/profiles/minecraft/
-
-
 resources:
   limits:
     memory: 500Mi
@@ -13,4 +7,6 @@ pspEnabled: false
 
 
 serviceMonitor:
-  enabled: false
+  enabled: true
+  interval: 5s
+  scrapeTimeout: 5s

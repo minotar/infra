@@ -6,4 +6,6 @@ pspEnabled: false
 
 
 serviceMonitor:
-  enabled: false
+  enabled: true
+  interval: 5s
+  scrapeTimeout: 5s
