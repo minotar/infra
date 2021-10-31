@@ -124,6 +124,7 @@
     t_caddy_site_host: "prometheus.{{ inventory_hostname }}"
     t_caddy_site_default_settings: true
     t_caddy_site_secure_headers: true
-    t_caddy_site_reverse_proxy: "localhost:9090"
+    t_caddy_site_reverse_proxy: "{{ prometheus_caddy_override_reverse | default('localhost:9090', true) }}"
+  when: prometheus_caddy_site
   tags:
     - caddy

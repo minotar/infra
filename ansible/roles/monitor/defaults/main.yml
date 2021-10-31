@@ -2,6 +2,9 @@
 
 grafana_version: "8.2.2"
 grafana_conf_dir: "/etc/grafana"
+grafana_caddy_site: true
+# Replace the localhost:3000 caddy Reverse Proxy address
+grafana_caddy_override_reverse:
 
 local_bin_path: "/usr/local/bin"
 
@@ -10,6 +13,9 @@ prometheus_user_name: prometheus
 prometheus_group_name: prometheus
 prometheus_version: "2.30.3"
 prometheus_force_install: false
+prometheus_caddy_site: true
+# Replace the localhost:9090 caddy Reverse Proxy address
+prometheus_caddy_override_reverse:
 
 blackbox_exporter_service_name: blackbox_exporter
 blackbox_exporter_user_name: blackbox_exporter
