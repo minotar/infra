@@ -1,0 +1,23 @@
+---
+
+local_bin_path: "/usr/local/bin"
+
+pomerium_service_name: pomerium
+pomerium_user_name: pomerium
+pomerium_group_name: pomerium
+pomerium_version: "0.15.5"
+pomerium_force_install: false
+
+pomerium_caddy_site: true
+pomerium_service_url: https://authenticate.localhost.pomerium.io
+# Optionally sign JWT
+pomerium_jwt_signing:
+pomerium_shared_secret:
+pomerium_cookie_secret:
+
+pomerium_idp_provider:
+pomerium_idp_client_id:
+pomerium_idp_client_secret:
+pomerium_idp_service_account:
+
+pomerium_routes_config:

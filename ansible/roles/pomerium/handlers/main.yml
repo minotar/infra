@@ -1,0 +1,8 @@
+---
+
+- name: restart pomerium
+  become: yes
+  systemd:
+    name: pomerium
+    daemon_reload: yes
+    state: restarted

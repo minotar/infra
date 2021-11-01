@@ -1,0 +1,113 @@
+---
+
+- name: Creating pomerium group
+  group:
+    name: "{{ pomerium_group_name }}"
+    system: yes
+
+- name: Creating pomerium user
+  user:
+    name: "{{ pomerium_user_name }}"
+    group: "{{ pomerium_group_name }}"
+    system: yes
+    shell: "/sbin/nologin"
+    comment: "{{ pomerium_user_name }} nologin User"
+    createhome: no
+
+- name: Creates pomerium config directory
+  file:
+    path: "/etc/pomerium/"
+    state: directory
+    owner: root
+    group: "{{ pomerium_group_name }}"
+    mode: 0770
+
+- name: Get current pomerium version
+  command: "{{ local_bin_path }}/pomerium --version"
+  check_mode: no
+  changed_when: false
+  failed_when: false
+  register: __pomerium_version
+
+- name: Determine whether we need to install pomerium
+  set_fact:
+    # if the version command failed, OR the parsed version did not match, then we install
+    _install_pomerium: "{% if __pomerium_version.rc != 0 or not __pomerium_version.stdout_lines[0].split(' ')[1].startswith(pomerium_version) %}true{% else %}false{% endif %}"
+
+- name: Install pomerium
+  when: _install_pomerium or pomerium_force_install
+  block:
+    - name: Download pomerium
+      become: no
+      unarchive:
+        src: "https://github.com/pomerium/pomerium/releases/download/v{{ pomerium_version }}/pomerium-linux-amd64.tar.gz"
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Copy pomerium file to bin
+      # Skip this when in --check mode as the download would have been skipped
+      when: not ansible_check_mode
+      copy:
+        src: "/tmp/pomerium"
+        dest: "{{ local_bin_path }}/pomerium"
+        owner: "{{ pomerium_user_name }}"
+        group: "{{ pomerium_group_name }}"
+        remote_src: yes
+        mode: 0755
+      notify:
+        - restart pomerium
+
+    - name: Delete pomerium tmp folder
+      file:
+        path: '/tmp/pomerium'
+        state: absent
+
+- name: pomerium config file
+  template:
+    src: pomerium.yaml.j2
+    dest: /etc/pomerium/config.yaml
+    owner: root
+    group: "{{ pomerium_group_name }}"
+    mode: 0640
+  notify:
+    - restart pomerium
+
+- name: Create Unit file for pomerium
+  template:
+    src: pomerium.service.j2
+    dest: /etc/systemd/system/pomerium.service
+    mode: 644
+  notify:
+    - restart pomerium
+
+# Trigger systemctl reload/restart if needed
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: start pomerium service
+  service: name=pomerium.service state=started enabled=yes
+
+#- name: Check if pomerium emits metrices
+#  uri:
+#    url: http://127.0.0.1:9100/metrics
+#    method: GET
+#    status_code: 200
+
+
+- name: configure caddy for pomerium
+  include_role:
+    name: caddy
+    apply:
+      tags:
+        - caddy
+    tasks_from: add_site
+    public: no
+  vars:
+    t_caddy_site_name: pomerium
+    t_caddy_site_host: "{{ pomerium_service_url }}"
+    t_caddy_site_default_settings: true
+    t_caddy_site_secure_headers: true
+    t_caddy_site_reverse_proxy: "localhost:8080"
+  when: pomerium_caddy_site
+  tags:
+    - caddy

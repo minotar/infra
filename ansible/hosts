@@ -1,8 +1,10 @@
+---
 
-
-[monitoring]
-monitoring.cluster.minotar.net
-
-
-[all:vars]
-acme_staging=True
+all:
+  children:
+    monitoring:
+      hosts:
+        monitoring.cluster.minotar.net:
+  vars:
+    acme_staging: false
+    pomerium_service_url: https://auth.cluster.minotar.net

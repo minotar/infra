@@ -1,0 +1,19 @@
+
+address: 127.0.0.1:8080
+# Insecure is only "okay" if loopback only
+insecure_server: true
+
+authenticate_service_url: {{ pomerium_service_url }}
+shared_secret: {{ pomerium_shared_secret }}
+cookie_secret: {{ pomerium_cookie_secret }}
+
+idp_provider: {{ pomerium_idp_provider }}
+idp_client_id: {{ pomerium_idp_client_id }}
+idp_client_secret: {{ pomerium_idp_client_secret }}
+idp_service_account: {{ pomerium_idp_service_account }}
+
+signing_key: {{ pomerium_jwt_signing }}
+#jwt_claims_headers: email
+
+routes:
+  {{ pomerium_routes_config|indent(2) }}

@@ -1,5 +1,12 @@
 ---
 
+pomerium_cookie_secret: 32_bytes_of_randomness
+
+pomerium_idp_provider: google
+pomerium_idp_client_id: XXXXXX
+pomerium_idp_client_secret: YYYYYY
+pomerium_idp_service_account: ZZZZZZ
+
 skind_servers:
 
   - host: node1:4643

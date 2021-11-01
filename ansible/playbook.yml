@@ -9,6 +9,7 @@
   roles:
     - caddy
     - monitor
+    - pomerium
 
 - name: monitoring clients
   hosts: all
