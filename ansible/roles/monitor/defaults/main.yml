@@ -2,7 +2,24 @@
 
 grafana_version: "8.2.2"
 grafana_conf_dir: "/etc/grafana"
+# Can be blank to bind to all interfaces
+grafana_listen_address: localhost
+# Set true on first install
+grafana_set_admin_password: false
+# Used for adding admin users
+grafana_admin_password:
+# Will reset the user email/name/password etc.
+grafana_set_admins: false
+# List of Usernames to add to Server Admins
+# They can then add themselves org level at /admin/orgs/edit/1
+grafana_admins: []
 grafana_caddy_site: true
+grafana_jwt: false
+grafana_jwt_header: X-JWT-Assertion
+grafana_jwt_username_claim: sub
+grafana_jwt_email_claim: email
+grafana_jwt_jwks:
+
 # Replace the localhost:3000 caddy Reverse Proxy address
 grafana_caddy_override_reverse:
 
@@ -13,6 +30,7 @@ prometheus_user_name: prometheus
 prometheus_group_name: prometheus
 prometheus_version: "2.30.3"
 prometheus_force_install: false
+prometheus_listen_address: localhost:9090
 prometheus_caddy_site: true
 # Replace the localhost:9090 caddy Reverse Proxy address
 prometheus_caddy_override_reverse:

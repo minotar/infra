@@ -8,3 +8,30 @@ all:
   vars:
     acme_staging: false
     pomerium_service_url: https://auth.cluster.minotar.net
+
+    # Set to true on first install/setup
+    grafana_set_admin_password: false
+    # Can be left true, but clobbers any changes
+    grafana_set_admins: false
+    grafana_admins:
+      - LukeHandle
+      - clone1018
+    grafana_jwt: true
+    grafana_jwt_header: X-Pomerium-Jwt-Assertion
+    grafana_jwt_jwks: "{{ pomerium_service_url }}/.well-known/pomerium/jwks.json"
+
+    # Set Prometheus/Grafana hosts to point at Pomerium
+    prometheus_caddy_override_reverse: localhost:8080
+    grafana_caddy_override_reverse: localhost:8080
+    pomerium_routes_config: |
+      # route config here
+      - from: https://prometheus.monitoring.cluster.minotar.net
+        to: http://localhost:9090
+        allowed_groups:
+          - 5317643
+      - from: https://grafana.monitoring.cluster.minotar.net
+        to: http://localhost:3000
+        allow_websockets: true
+        pass_identity_headers: true
+        allowed_groups:
+          - 5317643

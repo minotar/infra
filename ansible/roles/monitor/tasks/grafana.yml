@@ -15,12 +15,106 @@
     # The deb technically already restarts grafana and triggers the systemd reload
     - restart grafana
 
+- name: set grafana admin password
+  command:
+    cmd: grafana-cli admin reset-admin-password --password-from-stdin
+    stdin: "{{ grafana_admin_password }}"
+  register: __grafana_password_set
+  changed_when: "'Admin password changed successfully' in __grafana_password_set.stdout"
+  when: grafana_set_admin_password and grafana_admin_password != ""
+
+- name: set grafana admin user(s)
+  # This will clobber any changes to name/email
+  community.grafana.grafana_user:
+    login: "{{ item }}"
+    name: ""
+    email: "{{ item }}@localhost"
+    password: "{{ grafana_admin_password }}"
+    is_admin: true
+    url: http://localhost:3000/
+    url_username: admin
+    url_password: "{{ grafana_admin_password }}"
+  when: grafana_set_admins and grafana_admin_password != ""
+  loop: "{{ grafana_admins }}"
+  notify:
+    - restart grafana
+
+- name: configure grafana for JWT auth
+  when: grafana_jwt
+  notify:
+    - restart grafana
+  block:
+    - name: enable auth.jwt
+      ini_file:
+        path: /etc/grafana/grafana.ini
+        section: auth.jwt
+        option: enabled
+        value: "true"
+
+    - name: set JWT header
+      ini_file:
+        path: /etc/grafana/grafana.ini
+        section: auth.jwt
+        option: header_name
+        value: "{{ grafana_jwt_header }}"
+
+    - name: set username claim
+      ini_file:
+        path: /etc/grafana/grafana.ini
+        section: auth.jwt
+        option: username_claim
+        value: "{{ grafana_jwt_username_claim }}"
+
+    - name: set email claim
+      ini_file:
+        path: /etc/grafana/grafana.ini
+        section: auth.jwt
+        option: email_claim
+        value: "{{ grafana_jwt_email_claim }}"
+
+    - name: set JWK endpoint
+      ini_file:
+        path: /etc/grafana/grafana.ini
+        section: auth.jwt
+        option: jwk_set_url
+        value: "{{ grafana_jwt_jwks }}"
+
+    - name: set JWK cache
+      ini_file:
+        path: /etc/grafana/grafana.ini
+        section: auth.jwt
+        option: cache_ttl
+        value: 1h
+
+    - name: disable login form
+      ini_file:
+        path: /etc/grafana/grafana.ini
+        section: auth
+        option: disable_login_form
+        value: "true"
+
+    - name: disable signouts
+      ini_file:
+        path: /etc/grafana/grafana.ini
+        section: auth
+        option: disable_signout_menu
+        value: "true"
+
+- name: set grafana listen address
+  ini_file:
+    path: /etc/grafana/grafana.ini
+    section: server
+    option: http_addr
+    value: "{{ grafana_listen_address }}"
+  notify:
+    - restart grafana
+
 - name: start/enable grafana service
   service: name=grafana-server.service state=started enabled=yes
 
 - name: check if grafana is accessible.
   uri:
-    url: http://{{ inventory_hostname }}:3000
+    url: http://localhost:3000
     method: GET
     status_code: 200
 

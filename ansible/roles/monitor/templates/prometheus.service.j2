@@ -8,9 +8,10 @@ User={{ prometheus_user_name }}
 Group={{ prometheus_group_name }}
 Restart=on-abnormal
 Type=simple
-ExecStart=/usr/local/bin/prometheus                                    \
-                         --config.file=/etc/prometheus/prometheus.conf \
-                         --storage.tsdb.path=/data/prometheus          \
+ExecStart=/usr/local/bin/prometheus                                           \
+                         --config.file=/etc/prometheus/prometheus.conf        \
+                         --web.listen-address={{ prometheus_listen_address }} \
+                         --storage.tsdb.path=/data/prometheus                 \
                          --storage.tsdb.retention.time=60d
 
 [Install]

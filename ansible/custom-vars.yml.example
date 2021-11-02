@@ -1,11 +1,17 @@
 ---
 
+grafana_admin_password: super_secret_long_password
+
 pomerium_cookie_secret: 32_bytes_of_randomness
 
 pomerium_idp_provider: google
 pomerium_idp_client_id: XXXXXX
 pomerium_idp_client_secret: YYYYYY
+# GitHub requires the formatting: `echo '{"username": "GitHub_Username", "personal_access_token": "ZZZZZZ"}' | base64 -w 0`
 pomerium_idp_service_account: ZZZZZZ
+
+# Gen via `openssl ecparam  -genkey  -name prime256v1  -noout | base64 -w0`
+pomerium_jwt_signing: long_base64_of_key
 
 skind_servers:
 
