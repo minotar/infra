@@ -50,6 +50,18 @@ helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --
 
 ```
 
+#### Floating IP
+
+```
+kubectl create namespace flipop
+kubectl -n flipop create secret generic flipop-provider-tokens --from-literal=DIGITALOCEAN_ACCESS_TOKEN="${DIGITALOCEAN_ACCESS_TOKEN}"
+```
+
+```
+helm install flipop helm/charts/minotar-flipop --namespace flipop
+```
+
+
 #### App
 
 Minotar website via Caddy:

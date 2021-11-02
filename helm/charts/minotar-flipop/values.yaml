@@ -1,8 +1,9 @@
 
 
-## DigitalOcean Access Token secret must be manually created in the namespace
-## `kubectl create secret generic flipop -n flipop --from-literal=DIGITALOCEAN_ACCESS_TOKEN="XXX"`
-doSecretName: "flipop"
+## Provider secret must be manually created in the namespace
+## Must contain  keys for either/both DIGITALOCEAN_ACCESS_TOKEN/CLOUDFLARE_TOKEN
+## `kubectl create secret generic flipop-provider-tokens -n flipop --from-literal=DIGITALOCEAN_ACCESS_TOKEN="XXX"`
+providerSecrets: "flipop-provider-tokens"
 
 image:
   repository: digitaloceanapps/flipop

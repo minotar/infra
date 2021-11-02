@@ -35,12 +35,9 @@ spec:
         - name: flipop
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: DIGITALOCEAN_ACCESS_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  key: DIGITALOCEAN_ACCESS_TOKEN
-                  name: {{ .Values.doSecretName }}
+          envFrom:
+          - secretRef:
+              name: {{ .Values.providerSecrets }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           ports:
