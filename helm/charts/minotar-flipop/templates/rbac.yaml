@@ -1,0 +1,74 @@
+apiVersion: {{ template "rbac.apiVersion" . }}
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ include "minotar-flipop.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "minotar-flipop.chart" . }}
+  name: {{ template "minotar-flipop.fullname" . }}
+rules:
+- apiGroups: [""]
+  resources: ["pods", "nodes"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["flipop.digitalocean.com"]
+  resources: ["nodednsrecordsets"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["flipop.digitalocean.com"]
+  resources: ["floatingippools", "floatingippools/status", "nodednsrecordsets/status"]
+  verbs: ["get", "watch", "list", "update"]
+
+---
+apiVersion: {{ template "rbac.apiVersion" . }}
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ include "minotar-flipop.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "minotar-flipop.chart" . }}
+  name: {{ template "minotar-flipop.fullname" . }}
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "configmaps/status"]
+  verbs: ["get", "list", "watch", "update", "create", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["configmaps/status"]
+  verbs: ["get", "update", "patch"]
+
+---
+apiVersion: {{ template "rbac.apiVersion" . }}
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/name: {{ include "minotar-flipop.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "minotar-flipop.chart" . }}
+  name: {{ template "minotar-flipop.fullname" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "minotar-flipop.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "minotar-flipop.serviceAccountName" . }}
+
+---
+apiVersion: {{ template "rbac.apiVersion" . }}
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ include "minotar-flipop.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "minotar-flipop.chart" . }}
+  name: {{ template "minotar-flipop.fullname" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "minotar-flipop.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "minotar-flipop.serviceAccountName" . }}

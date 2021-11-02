@@ -1,0 +1,40 @@
+
+
+## DigitalOcean Access Token secret must be manually created in the namespace
+## `kubectl create secret generic flipop -n flipop --from-literal=DIGITALOCEAN_ACCESS_TOKEN="XXX"`
+doSecretName: "flipop"
+
+image:
+  repository: digitaloceanapps/flipop
+  tag: latest
+  #pullPolicy: IfNotPresent
+  pullPolicy: Always
+
+restartPolicy: Always
+
+resources:
+#  limits:
+#    cpu: 50m
+#    memory: 50Mi
+  requests:
+    cpu: 15m
+    memory: 20Mi
+
+containerPort: 8080
+
+# The name of the ServiceAccount to use.
+# If not set, a name is generated using the fullname template
+serviceAccountName:
+
+serviceMonitor:
+  ## If true, a ServiceMonitor CRD is created for a prometheus operator
+  ## https://github.com/coreos/prometheus-operator
+  ##
+  enabled: false
+
+  portName: metrics
+  interval: 30s
+  scrapeTimeout: 10s
+  additionalMetricsRelabels: {}
+  selector:
+    release: prometheus
