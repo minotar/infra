@@ -87,12 +87,12 @@
 - name: start pomerium service
   service: name=pomerium.service state=started enabled=yes
 
-#- name: Check if pomerium emits metrices
-#  uri:
-#    url: http://127.0.0.1:9100/metrics
-#    method: GET
-#    status_code: 200
-
+- name: Check if pomerium emits healthcheck "OK"
+  uri:
+    url: http://127.0.0.1:8080/ping
+    method: GET
+    body: OK
+    status_code: 200
 
 - name: configure caddy for pomerium
   include_role:
