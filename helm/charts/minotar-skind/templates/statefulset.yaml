@@ -61,9 +61,18 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
           - --server.http-listen-port={{ .Values.containerPort }}
-          - --cache.uuid.bolt-path=/skind/bolt_cache_uuid.db
-          - --cache.userdata.bolt-path=/skind/bolt_cache_userdata.db
+
+          - --cache.uuid.backend=migrate
+          - --cache.uuid.badger-path=/skind-badger/badger_cache_uuid/
+          - --cache.uuid.bolt-path=/skind-bolt/bolt_cache_uuid.db
+
+          - --cache.userdata.backend=migrate
+          - --cache.userdata.badger-path=/skind-badger/badger_cache_userdata/
+          - --cache.userdata.bolt-path=/skind-bolt/bolt_cache_userdata.db
+
+          - --cache.textures.backend=bolt
           - --cache.textures.bolt-path=/ephemeral-cache/bolt_cache_textures.db
+
           - --mcclient.useragent={{ .Values.mcclient.userAgent }}
           - --mcclient.sessionserver-url={{ .Values.mcclient.sessionServerURL }}
           - --mcclient.profile-url={{ .Values.mcclient.profileURL }}
@@ -82,26 +91,40 @@ spec:
           readinessProbe:
             {{- toYaml .Values.readinessProbe | trim | nindent 12 }}
           volumeMounts:
-          - mountPath: "/skind"
+          - mountPath: "/skind-bolt"
             name: bolt-cache-pvc
+          - mountPath: "/skind-badger"
+            name: badger-cache-pvc
           - name: ephemeral-cache
             mountPath: /ephemeral-cache
 
       initContainers:
         - name: skind-data-permission-fix
           image: busybox
-          command: ["/bin/chmod","-R","777", "/skind"]
+          command: ["/bin/chmod","-R","777", "/skind-bolt", "/skind-badger"]
           volumeMounts:
-          - name: bolt-cache-pvc
-            mountPath: /skind
+          - mountPath: "/skind-bolt"
+            name: bolt-cache-pvc
+          - mountPath: "/skind-badger"
+            name: badger-cache-pvc
 
       volumes:
         - name: ephemeral-cache
           emptyDir: {}
 
+  # Make sure to update init container
   volumeClaimTemplates:
   - metadata:
       name: bolt-cache-pvc
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: do-block-storage
+  - metadata:
+      name: badger-cache-pvc
     spec:
       accessModes:
       - ReadWriteOnce

@@ -27,6 +27,8 @@ helm-upgrade-skind:
 helm-upgrade-processd:
 	helm upgrade processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
 
+
+
 helm-restart-skind:
 	kubectl --namespace=imgd rollout restart sts skind-minotar-skind
 
@@ -34,3 +36,6 @@ helm-redeploy-skind:
 	kubectl --namespace=imgd delete sts --cascade=orphan skind-minotar-skind
 	${MAKE} helm-upgrade-skind
 	${MAKE} helm-restart-skind
+
+helm-restart-processd:
+	kubectl --namespace=imgd rollout restart deployment processd-minotar-processd
