@@ -62,20 +62,14 @@ skind:
 helm install skind helm/charts/minotar-skind --namespace imgd --values helm/minotar-skind-values.yaml --values helm/mcclient-values.yaml
 ```
 
-skind Varnish / "mittwald-httpcache":
+Frontend Varnish / "mittwald-httpcache":
 ```
-helm install skind-varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-skind-values.yaml
+helm install frontend-varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-frontend-values.yaml
 ```
 
 processd:
 ```
 helm install processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
-```
-
-
-processd/website/frontend Varnish / "mittwald-httpcache":
-```
-helm install frontend-varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-frontend-values.yaml
 ```
 
 
@@ -92,17 +86,12 @@ skind:
 helm upgrade skind helm/charts/minotar-skind --namespace imgd --values helm/minotar-skind-values.yaml --values helm/mcclient-values.yaml
 ```
 
-skind Varnish / "mittwald-httpcache":
+Frontend Varnish / "mittwald-httpcache":
 ```
-helm upgrade skind-varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-skind-values.yaml
+helm upgrade frontend-varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-frontend-values.yaml
 ```
 
 processd:
 ```
 helm upgrade processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
-```
-
-processd/website/frontend Varnish / "mittwald-httpcache":
-```
-helm upgrade frontend-varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-frontend-values.yaml
 ```

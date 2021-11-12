@@ -1,7 +1,7 @@
 
 resources:
   limits:
-    memory: 750Mi
+    memory: 1Gi
 
 pspEnabled: false
 

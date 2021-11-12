@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: quay.io/mittwald/kube-httpcache
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   tag: "stable"
 
 
@@ -23,18 +23,17 @@ cache:
   # name of frontend service
   # frontendService: kube-httpcache-headless
   # name of backend service
-  backendService: processd-minotar-processd
+  backendService: skind-minotar-skind
   # name of backend service namespace
   # backendServiceNamespace: backend-service-namespace
   # watching for frontend changes is true by default
   frontendWatch: true
   # watching for backend changes is true by default
-  # We don't care about the backends as they are already managed by a Varnish STS
-  backendWatch: false
+  backendWatch: true
   # Varnish storage backend type (https://varnish-cache.org/docs/trunk/users-guide/storage-backends.html)
-  varnishStorage: malloc # default,malloc,umem,file...
+  varnishStorage: file,/cache/varnish-cache # default,malloc,umem,file...
   # Varnish storage backend size
-  storageSize: 64M # K(ibibytes), M(ebibytes), G(ibibytes), T(ebibytes) ... unlimited
+  storageSize: 2G # K(ibibytes), M(ebibytes), G(ibibytes), T(ebibytes) ... unlimited
   # Varnish transient storage backend type (https://varnish-cache.org/docs/trunk/users-guide/storage-backends.html)
   varnishTransientStorage: malloc
   # Varnish transient storage backend size
@@ -49,10 +48,28 @@ cacheExtraArgs: {}
   # - -v=8
   # - -varnish-additional-parameters=vcc_allow_inline_c=on
 
+extraVolumes:
+  - name: file-cache
+    emptyDir: {}
+
+extraMounts:
+  - name: file-cache
+    mountPath: /cache/varnish-cache
+
+exporter:
+  enabled: true
+  resources:
+    limits:
+      memory: 25Mi
+    requests:
+      cpu: 10m
+      memory: 10Mi
+serviceMonitor: true
+
 service:
   type: ClusterIP
   port: 80
-  target: 80
+  target: 8080
 
 resources:
   limits:
@@ -106,27 +123,36 @@ vclTemplate: |
   }
   {{- end }}
 
+  {{ range .Backends }}
+  backend be-{{ .Name }} {
+      .host = "{{ .Host }}";
+      .port = "{{ .Port }}";
+  }
+  {{- end }}
+
   backend svc-processd-minotar-processd {
       .host = "processd-minotar-processd";
       .port = "80";
   }
 
-  backend svc-skind-varnish-httpcache {
-      .host = "skind-varnish-httpcache";
-      .port = "80";
-  }
-
-  backend svc-frontend-website-minotar-caddy {
-      .host = "frontend-website-minotar-caddy";
-      .port = "80";
-  }
+  #backend svc-frontend-website-minotar-caddy {
+  #    .host = "frontend-website-minotar-caddy";
+  #    .port = "80";
+  #}
 
   sub vcl_init {
+      // Statefulset Varnish Instances
       new cluster = directors.hash();
-
       {{ range .Frontends -}}
       cluster.add_backend({{ .Name }}, 1);
       {{ end }}
+
+      // skind backend servers
+      new lb-skind = directors.hash();
+      {{ range .Backends -}}
+      lb-skind.add_backend(be-{{ .Name }}, 1);
+      {{ end }}
+
   }
 
   sub sanitize_incoming
@@ -165,10 +191,10 @@ vclTemplate: |
         }
       }
 
-      if (req.url == "/webhook/github") {
-        set req.backend_hint = svc-frontend-website-minotar-caddy;
-        return (pass);
-      }
+      #if (req.url == "/webhook/github") {
+      #  set req.backend_hint = svc-frontend-website-minotar-caddy;
+      #  return (pass);
+      #}
 
       # Only deal with GET and HEAD, 405 if not
       if (req.method != "GET" &&
@@ -176,26 +202,31 @@ vclTemplate: |
         return (synth(405, "GET, HEAD"));
       }
 
-      if (req.url == "/" || req.url == "/favicon.ico" || req.url == "/robots.txt" || req.url == "/404.html" || req.url ~ "^/assets/" || req.url ~ "^/addons/") {
-        set req.backend_hint = svc-frontend-website-minotar-caddy;
-        return (pass);
-      }
+      #if (req.url == "/" || req.url == "/favicon.ico" || req.url == "/robots.txt" || req.url == "/404.html" || req.url ~ "^/assets/" || req.url ~ "^/addons/") {
+      #  set req.backend_hint = svc-frontend-website-minotar-caddy;
+      #  return (pass);
+      #}
 
-      if (req.url ~ "^/skin/" || req.url ~ "^/download/") {
-        set req.backend_hint = svc-skind-varnish-httpcache;
-        return(pass);
-      }
+      # Remove the resource type from the URL for calculating the hash
+      # (eg. so hash is only the last part of the URL - the Username/UUID so we always query same skind)
+      set req.http.X-Req-Hash = regsub(req.url, ".*/(\w+)$", "\1");
 
       # Sharded Varnish Routing logic. Pass a request to an appropriate Varnish node.
       # See https://info.varnish-software.com/blog/creating-self-routing-varnish-cluster for more info.
       unset req.http.x-cache;
-      set req.backend_hint = cluster.backend(req.url);
+      set req.backend_hint = cluster.backend(req.http.X-Req-Hash);
       set req.http.x-shard = req.backend_hint;
       if (req.http.x-shard != server.identity) {
           return(pass);
       }
 
       ## Request was meant for this Varnish shard
+
+      // Do we send directly to skind?
+      if (req.url ~ "^/skin/" || req.url ~ "^/download/") {
+        set req.backend_hint = lb-skind.backend(req.http.X-Req-Hash);
+        return(hash);
+      }
 
       # Must be processd URL
       set req.backend_hint = svc-processd-minotar-processd;
@@ -221,14 +252,6 @@ vclTemplate: |
       # How many attempts it took to get the resource
       if (bereq.retries > 0) {
         set beresp.http.X-Attempts = bereq.retries + 1;
-      }
-
-      # Set 2min cache if unset for static files
-      if (beresp.ttl <= 0s || beresp.http.Vary == "*") {
-        set beresp.ttl = 120s; # Important, you shouldn't rely on this, SET YOUR HEADERS in the backend
-        # The uncacheable header tells Varnish to keep a record that we should not cache this request and we should go to backend.
-        #set beresp.uncacheable = true;
-        return (deliver);
       }
 
       # Allow stale content, in case the backend goes down.
@@ -276,6 +299,8 @@ vclTemplate: |
       # Called before a cached object is delivered to the client.
 
       # Set debug info headers
+      set resp.http.X-Req-Hash = req.http.X-Req-Hash;
+
       set resp.http.X-Varnish-Server = server.identity;
 
       # Only add the object headers when it was served by this shard
