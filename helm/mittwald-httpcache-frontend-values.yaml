@@ -73,10 +73,10 @@ service:
 
 resources:
   limits:
-    memory: 500Mi
+    memory: 750Mi
   requests:
     cpu: 100m
-    memory: 128Mi
+    memory: 500Mi
 
 
 affinity:
@@ -159,9 +159,9 @@ vclTemplate: |
   {
 
       # If not for the server_name && not the server_name redirect then we can drop it.
-      if (req.http.host != "minotar.net" && req.http.host != "minotar.net:80" && req.http.host != "www.minotar.net") {
-        return (synth(403, "Forbidden"));
-      }
+      #if (req.http.host != "minotar.net" && req.http.host != "minotar.net:80" && req.http.host != "www.minotar.net") {
+      #  return (synth(403, "Forbidden"));
+      #}
 
       # Let's remove all query strings, ampersands and hashes
       # These should not appear in any requests and are unrequired.

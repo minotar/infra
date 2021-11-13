@@ -27,6 +27,9 @@ helm-upgrade-skind:
 helm-upgrade-processd:
 	helm upgrade processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
 
+helm-upgrade-varnish:
+	helm upgrade frontend-varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-frontend-values.yaml
+
 
 
 helm-restart-skind:
@@ -39,3 +42,9 @@ helm-redeploy-skind:
 
 helm-restart-processd:
 	kubectl --namespace=imgd rollout restart deployment processd-minotar-processd
+
+
+
+
+helm-restart-varnish:
+	kubectl --namespace=imgd rollout restart sts frontend-varnish-httpcache
