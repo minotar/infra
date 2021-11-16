@@ -1,4 +1,16 @@
 
+## Docs
+
+plantuml-jetty-start:
+	@docker run --name plantuml_jetty --rm -d -p 8081:8080 plantuml/plantuml-server:jetty
+
+plantuml-jetty-stop:
+	@docker kill plantuml_jetty
+
+docs/Prod.png: docs/prod.plantuml
+	-curl --silent --show-error --fail -H "Content-Type: text/plain" --data-binary @docs/prod.plantuml http://localhost:8081/png/ --output docs/Prod.png
+
+
 ## terraform
 
 terraform-init:
