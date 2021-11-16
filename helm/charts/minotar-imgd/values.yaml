@@ -7,7 +7,7 @@ mcclient:
 
 image:
   repository: minotar/imgd
-  tag: version4-e29acd7
+  tag: version4-d37d8c9-WIP
   #pullPolicy: IfNotPresent
   pullPolicy: Always
 

@@ -62,13 +62,11 @@ spec:
           args:
           - --server.http-listen-port={{ .Values.containerPort }}
 
-          - --cache.uuid.backend=migrate
+          - --cache.uuid.backend=badger
           - --cache.uuid.badger-path=/skind-badger/badger_cache_uuid/
-          - --cache.uuid.bolt-path=/skind-bolt/bolt_cache_uuid.db
 
-          - --cache.userdata.backend=migrate
+          - --cache.userdata.backend=badger
           - --cache.userdata.badger-path=/skind-badger/badger_cache_userdata/
-          - --cache.userdata.bolt-path=/skind-bolt/bolt_cache_userdata.db
 
           - --cache.textures.backend=bolt
           - --cache.textures.bolt-path=/ephemeral-cache/bolt_cache_textures.db
@@ -91,8 +89,6 @@ spec:
           readinessProbe:
             {{- toYaml .Values.readinessProbe | trim | nindent 12 }}
           volumeMounts:
-          - mountPath: "/skind-bolt"
-            name: bolt-cache-pvc
           - mountPath: "/skind-badger"
             name: badger-cache-pvc
           - name: ephemeral-cache
@@ -101,10 +97,8 @@ spec:
       initContainers:
         - name: skind-data-permission-fix
           image: busybox
-          command: ["/bin/chmod","-R","777", "/skind-bolt", "/skind-badger"]
+          command: ["/bin/chmod","-R","777", "/skind-badger"]
           volumeMounts:
-          - mountPath: "/skind-bolt"
-            name: bolt-cache-pvc
           - mountPath: "/skind-badger"
             name: badger-cache-pvc
 
@@ -114,15 +108,6 @@ spec:
 
   # Make sure to update init container
   volumeClaimTemplates:
-  - metadata:
-      name: bolt-cache-pvc
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
-          storage: 10Gi
-      storageClassName: do-block-storage
   - metadata:
       name: badger-cache-pvc
     spec:
