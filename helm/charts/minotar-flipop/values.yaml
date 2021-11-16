@@ -14,11 +14,11 @@ image:
 restartPolicy: Always
 
 resources:
-#  limits:
-#    cpu: 50m
-#    memory: 50Mi
+  limits:
+    cpu: 150m
+    memory: 30Mi
   requests:
-    cpu: 15m
+    cpu: 5m
     memory: 20Mi
 
 containerPort: 8080
