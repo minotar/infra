@@ -4,10 +4,11 @@ mcclient:
   userAgent: minotar/imgd (https://github.com/minotar/imgd) - k8
   sessionServerURL: https://sessionserver.mojang.com/session/minecraft/profile/
   profileURL: https://api.mojang.com/users/profiles/minecraft/
+  textureURL: ""
 
 image:
   repository: minotar/skind
-  tag: version4-d37d8c9-WIP
+  tag: version4-f7173be-WIP
   #pullPolicy: IfNotPresent
   pullPolicy: Always
 

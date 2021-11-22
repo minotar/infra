@@ -38,7 +38,10 @@ spec:
         - name: processd
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args: ["--server.http-listen-port={{ .Values.containerPort }}", "--processd.skind-url={{ .Values.skindURL }}"]
+          args:
+            - --server.http-listen-port={{ .Values.containerPort }}
+            - --processd.skind-url={{ .Values.skindURL }}
+            - --processd.redirect-username=false
           securityContext:
             readOnlyRootFilesystem: {{ .Values.readOnlyRootFilesystem }}
             runAsNonRoot: {{ .Values.runAsNonRoot  }}

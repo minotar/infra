@@ -61,6 +61,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
           - --server.http-listen-port={{ .Values.containerPort }}
+          - --skind.redirect-username=false
 
           - --cache.uuid.backend=badger
           - --cache.uuid.badger-path=/skind-badger/badger_cache_uuid/
@@ -68,12 +69,12 @@ spec:
           - --cache.userdata.backend=badger
           - --cache.userdata.badger-path=/skind-badger/badger_cache_userdata/
 
-          - --cache.textures.backend=bolt
-          - --cache.textures.bolt-path=/ephemeral-cache/bolt_cache_textures.db
+          - --cache.textures.backend=none
 
           - --mcclient.useragent={{ .Values.mcclient.userAgent }}
           - --mcclient.sessionserver-url={{ .Values.mcclient.sessionServerURL }}
           - --mcclient.profile-url={{ .Values.mcclient.profileURL }}
+          - --mcclient.textures-url={{ .Values.mcclient.textureURL }}
 
           securityContext:
             readOnlyRootFilesystem: {{ .Values.readOnlyRootFilesystem }}
