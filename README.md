@@ -64,9 +64,9 @@ helm install flipop helm/charts/minotar-flipop --namespace flipop
 
 #### App
 
-Minotar website via Caddy:
+Minotar website via Nginx:
 ```
-helm install frontend-website helm/charts/minotar-caddy --namespace imgd --values helm/minotar-caddy-values.yaml
+helm install frontend-website helm/charts/minotar-website --namespace imgd --values helm/minotar-website-values.yaml
 ```
 
 skind:
@@ -88,9 +88,10 @@ helm install processd helm/charts/minotar-processd --namespace imgd --values hel
 
 ### Upgrade
 
-Minotar website via Caddy:
+Minotar website via Nginx:
 ```
-helm upgrade frontend-website helm/charts/minotar-caddy --namespace imgd --values helm/minotar-caddy-values.yaml
+helm upgrade frontend-website helm/charts/minotar-website --namespace imgd --values helm/minotar-website-values.yaml
+
 ```
 
 skind:

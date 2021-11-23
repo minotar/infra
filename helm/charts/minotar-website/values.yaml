@@ -1,0 +1,74 @@
+restartPolicy: Always
+
+extraEnv: {}
+
+## Enable pod security policy
+pspEnabled: false
+
+strategy:
+  rollingUpdate:
+    maxSurge: 2
+    maxUnavailable: 1
+  type: RollingUpdate
+
+
+image:
+  repository: minotar/minotar.net
+  tag: version4-8f436fb
+  #pullPolicy: IfNotPresent
+  pullPolicy: Always
+
+
+## User to run nginx container as
+runAsUser: 10001
+readOnlyRootFilesystem: true
+runAsNonRoot: true
+
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 15
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 15
+
+
+resources:
+#  limits:
+#    cpu: 50m
+#    memory: 30Mi
+  requests:
+    cpu: 10m
+    memory: 15Mi
+
+
+service:
+  annotations: {}
+  labels: {}
+  type: ClusterIP
+  port: 80
+
+containerPort: 80
+
+serviceAccount:
+  # Specifies whether a ServiceAccount should be created
+  create: true
+  # The name of the ServiceAccount to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+  annotations: {}
+
+
+podAnnotations: {}
+
+pod:
+  labels: {}
+
+replicas: 3
