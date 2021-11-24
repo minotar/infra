@@ -34,6 +34,11 @@ kubectl create namespace imgd
 
 Set your extra mcclient vars `helm/mcclient-values.yaml`
 
+
+```
+helm repo add bitnami https://charts.bitnami.com/bitnami
+```
+
 ### Install
 
 #### Monitoring
@@ -64,47 +69,15 @@ helm install flipop helm/charts/minotar-flipop --namespace flipop
 
 #### App
 
-Minotar website via Nginx:
-```
-helm install frontend-website helm/charts/minotar-website --namespace imgd --values helm/minotar-website-values.yaml
-```
-
-skind:
-```
-helm install skind helm/charts/minotar-skind --namespace imgd --values helm/minotar-skind-values.yaml --values helm/mcclient-values.yaml
-```
-
-Frontend Varnish / "mittwald-httpcache":
-```
-helm install frontend-varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-frontend-values.yaml
-```
-
-processd:
-```
-helm install processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
-```
+* Minotar website via Nginx: `make helm-website-install` and `make helm-website-upgrade`
 
 
+* Nginx Texture cache: `make helm-texture-install` and `make helm-texture-upgrade`
 
-### Upgrade
+* skind: `make helm-skind-install` and `make helm-skind-upgrade`
 
-Minotar website via Nginx:
-```
-helm upgrade frontend-website helm/charts/minotar-website --namespace imgd --values helm/minotar-website-values.yaml
+* Frontend Varnish / "mittwald-httpcache": `make helm-varnish-install` and `make helm-varnish-upgrade`
 
-```
 
-skind:
-```
-helm upgrade skind helm/charts/minotar-skind --namespace imgd --values helm/minotar-skind-values.yaml --values helm/mcclient-values.yaml
-```
+* processd: `make helm-processd-install` and `make helm-processd-upgrade`
 
-Frontend Varnish / "mittwald-httpcache":
-```
-helm upgrade frontend-varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-frontend-values.yaml
-```
-
-processd:
-```
-helm upgrade processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
-```
