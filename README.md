@@ -11,9 +11,15 @@ A DigitalOcean Access Token is needed, add this to your env at `DIGITALOCEAN_ACC
 
 ## Terraform
 
-Optionally set the region in the `.tfvars` file. On first run, init Terraform with `terraform -chdir=terraform/ init`.
+Optionally set the region in the `.tfvars` file. On first run, init Terraform with `make terraform-init`.
 
-Further run cluster creation/updates with `terraform -chdir=terraform/ apply`.
+Further run cluster creation/updates with `make terraform-apply`.
+
+## Ansible
+
+The monitoring node (outside of Kubernetes) is managed by Ansible.
+
+Deploy with `make ansible-deploy` and verify configuration is correct with `make ansible-check`
 
 ## Kubernetes
 
@@ -23,11 +29,12 @@ While terraform has the kubeconfig, it's easiest to just use `doctl` (as you sho
 doctl kubernetes cluster kubeconfig save minotar-k8s
 ```
 
-Create an imgd namespace for our associated services
+Create the required namespaces:
+```
+make k8-namespaces
+```
 
-```
-kubectl create namespace imgd
-```
+Once metrics-server is installed (under #Monitoring), you can use `make k8-top` to see at a glance cpu/memory stats.
 
 
 ## Helm
@@ -35,46 +42,29 @@ kubectl create namespace imgd
 Set your extra mcclient vars `helm/mcclient-values.yaml`
 
 
+Add required repos:
 ```
-helm repo add bitnami https://charts.bitnami.com/bitnami
+make helm-repos
 ```
 
 ### Monitoring
 
-```
-helm install metrics-server bitnami/metrics-server --namespace kube-system --values helm/bitnami-metrics-server-values.yaml
-```
+Metrics server (eg. for `kubectl top nodes` and `kubectl top pods`) is installed with `make helm-metrics-install`. Later upgrades via `make helm-metrics-upgrade`.
 
-
-```
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-
-helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --create-namespace --namespace kube-prometheus-stack --values helm/kube-prometheus-stack-values.yaml
-
-```
+Prometheus stack is installed with `make helm-prometheus-install` (this can take a little while) and upgraded via `make helm-prometheus-upgrade`
 
 ### Floating IP
 
+Create the token which will be used to assign the floating IPs to the nodes.
 ```
-kubectl create namespace flipop
 kubectl -n flipop create secret generic flipop-provider-tokens --from-literal=DIGITALOCEAN_ACCESS_TOKEN="${DIGITALOCEAN_ACCESS_TOKEN}"
 ```
 
-```
-helm install flipop helm/charts/minotar-flipop --namespace flipop
-```
+Installed with `make helm-flipop-install` and upgraded with `helm-flipop-upgrade`
 
 ### Ingress
 
-```
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-
-make helm-ingress-install
-```
-
-And subsequently, use `make helm-ingress-upgrade`
-
-
+Install nginx-ingress with `make helm-ingress-install` and subsequently upgrade with `make helm-ingress-upgrade`.
 
 ### App
 
