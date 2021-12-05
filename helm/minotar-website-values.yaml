@@ -6,6 +6,8 @@ ingress:
   enabled: true
   className: nginx
   host: minotar.net
+  annotations:
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
 
 resources:
   limits:
