@@ -57,6 +57,17 @@ service:
 
 containerPort: 80
 
+ingress:
+  enabled: false
+  annotations: {}
+  labels: {}
+  className: ""
+
+  host: website.local
+  # Defaults to the website service, but can accomadate another caching service
+  serviceName: ""
+  servicePort: ""
+
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
   create: true

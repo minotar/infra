@@ -1,6 +1,12 @@
 
 pspEnabled: false
 
+
+ingress:
+  enabled: true
+  className: nginx
+  host: minotar.net
+
 resources:
   limits:
     cpu: 50m
