@@ -1,0 +1,15 @@
+
+floatingIpPools:
+  - name: k8-ip-pool
+    provider: digitalocean
+    region: nyc1
+    desiredIps: 2
+    dnsRecordSet:
+      recordName: k8
+      zone: cluster.minotar.net
+      ttl: 30
+      provider: digitalocean
+    match:
+      nodeLabel: doks.digitalocean.com/node-pool=minotar-pool
+      podLabel: app.kubernetes.io/name=ingress-nginx,app.kubernetes.io/component=controller
+      podNamespace: nginx-ingress

@@ -40,6 +40,12 @@ k8-namespaces:
 	kubectl create namespace nginx-ingress
 
 
+helm-flipop-install:
+	helm install flipop helm/charts/minotar-flipop --namespace flipop --values helm/minotar-flipop-values.yaml
+helm-flipop-upgrade:
+	helm upgrade flipop helm/charts/minotar-flipop --namespace flipop --values helm/minotar-flipop-values.yaml
+
+
 helm-ingress-install:
 	helm install ingress ingress-nginx/ingress-nginx --namespace nginx-ingress --values helm/ingress-nginx-values.yaml
 helm-ingress-upgrade:

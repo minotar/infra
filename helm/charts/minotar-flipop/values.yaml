@@ -13,6 +13,40 @@ image:
 
 restartPolicy: Always
 
+# Floating IP Pools to create
+floatingIpPools:
+#    # Name of IP Pool
+#  - name: k8-ip-pool
+#    provider: digitalocean
+#    region: nyc1
+#    # Number of floating IPs to assign (defaults to 1 or 0 based on `ips`)
+#    desiredIps: 2
+#    # ips can be ommitted and fresh floating IPs will be assinged (`desiredIps` defaults to 1)
+#    # If a list of IPs is given, these will be used first (`desiredIps` defualts to 0 - assign all listed IPs )
+#    ips:
+#      - 192.168.1.1
+#      - 192.168.1.2
+#    # Default assignmentCoolOffSeconds is 20 seconds
+#    # assignmentCoolOffSeconds: 20
+#    # dnsRecordSet will have A records added for each assigned Floating IP
+#    dnsRecordSet:
+#      recordName: k8
+#      zone: example.com
+#      ttl: 30
+#      provider: digitalocean
+#    # match defines where the floating IPs can/should be assigned
+#    match:
+#      # nodeLabel defines which nodes can be candidates (eg. must be in the specific pool or region)
+#      nodeLabel: doks.digitalocean.com/node-pool=work
+#      # podLabel defines the candidate node must have a matching pod in Running/Ready state
+#      podLabel: app=nginx-ingress,component=controller
+#      # podNamespace limits the podLabel match to a specific namespace
+#      podNamespace: ingress
+#      # tolerations is list of node taints to tolerate when deciding if the node is a suitable candidate
+#      tolerations:
+#        - effect: NoSchedule
+#          key: node.kubernetes.io/unschedulable
+
 resources:
   limits:
     cpu: 150m

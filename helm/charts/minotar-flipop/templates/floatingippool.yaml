@@ -1,0 +1,27 @@
+{{- range $pool := .Values.floatingIpPools }}
+---
+apiVersion: flipop.digitalocean.com/v1alpha1
+kind: FloatingIPPool
+metadata:
+  name: {{ $pool.name }}
+  labels:
+    app.kubernetes.io/name: {{ include "minotar-flipop.name" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ include "minotar-flipop.chart" $ }}
+spec:
+  provider: {{ $pool.provider }}
+  region: {{ $pool.region }}
+  {{- if $pool.ips }}
+  desiredIPs: {{ $pool.desiredIps | default 0 }}
+  ips:
+{{ toYaml $pool.ips | indent 4 }}
+{{- else }}
+  desiredIPs: {{ $pool.desiredIps | default 1 }}
+{{- end }}
+  assignmentCoolOffSeconds: {{ $pool.assignmentCoolOffSeconds | default 20 }}
+  dnsRecordSet:
+{{ toYaml $pool.dnsRecordSet | indent 4 }}
+  match:
+{{ toYaml $pool.match | indent 4 }}
+{{- end }}
