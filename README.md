@@ -39,9 +39,7 @@ Set your extra mcclient vars `helm/mcclient-values.yaml`
 helm repo add bitnami https://charts.bitnami.com/bitnami
 ```
 
-### Install
-
-#### Monitoring
+### Monitoring
 
 ```
 helm install metrics-server bitnami/metrics-server --namespace kube-system --values helm/bitnami-metrics-server-values.yaml
@@ -55,7 +53,7 @@ helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack --
 
 ```
 
-#### Floating IP
+### Floating IP
 
 ```
 kubectl create namespace flipop
@@ -66,11 +64,21 @@ kubectl -n flipop create secret generic flipop-provider-tokens --from-literal=DI
 helm install flipop helm/charts/minotar-flipop --namespace flipop
 ```
 
+### Ingress
 
-#### App
+```
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+
+make helm-ingress-install
+```
+
+And subsequently, use `make helm-ingress-upgrade`
+
+
+
+### App
 
 * Minotar website via Nginx: `make helm-website-install` and `make helm-website-upgrade`
-
 
 * Nginx Texture cache: `make helm-texture-install` and `make helm-texture-upgrade`
 

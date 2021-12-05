@@ -37,6 +37,14 @@ ansible-check:
 k8-namespaces:
 	kubectl create namespace imgd
 	kubectl create namespace web
+	kubectl create namespace nginx-ingress
+
+
+helm-ingress-install:
+	helm install ingress ingress-nginx/ingress-nginx --namespace nginx-ingress --values helm/ingress-nginx-values.yaml
+helm-ingress-upgrade:
+	helm upgrade ingress ingress-nginx/ingress-nginx --namespace nginx-ingress --values helm/ingress-nginx-values.yaml
+
 
 # eg. New containers for release, upgrade both
 helm-imgd-upgrade: helm-skind-upgrade helm-processd-upgrade
