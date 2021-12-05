@@ -64,6 +64,20 @@ service:
 
 containerPort: 4643
 
+ingress:
+  enabled: false
+  annotations: {}
+  labels: {}
+  className: ""
+
+  host: skind.local
+  # Defaults to the skind service, but can accomadate another caching service
+  serviceName: ""
+  servicePort: ""
+  paths:
+    - /skin
+    - /download
+
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
   create: true

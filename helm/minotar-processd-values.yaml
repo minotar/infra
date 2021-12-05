@@ -5,6 +5,13 @@ skindURL: http://frontend-varnish-httpcache/skin/
 pspEnabled: false
 
 
+ingress:
+  enabled: true
+  className: nginx
+  host: minotar.net
+  serviceName: frontend-varnish-httpcache
+  servicePort: 80
+
 resources:
   limits:
     cpu: 200m

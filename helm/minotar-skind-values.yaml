@@ -6,6 +6,13 @@ resources:
 pspEnabled: false
 
 
+ingress:
+  enabled: true
+  className: nginx
+  host: minotar.net
+  serviceName: frontend-varnish-httpcache
+  servicePort: 80
+
 serviceMonitor:
   enabled: true
   interval: 5s

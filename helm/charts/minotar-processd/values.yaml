@@ -4,7 +4,7 @@ skindURL: https://minotar.net/skin/
 
 image:
   repository: minotar/processd
-  tag: version4-d37d8c9-WIP
+  tag: version4-f7173be-WIP
   #pullPolicy: IfNotPresent
   pullPolicy: Always
 
@@ -60,6 +60,28 @@ service:
   port: 80
 
 containerPort: 8080
+
+ingress:
+  enabled: false
+  annotations: {}
+  labels: {}
+  className: ""
+
+  host: processd.local
+  # Defaults to the processd service, but can accomadate another caching service
+  serviceName: ""
+  servicePort: ""
+  paths:
+    - /avatar
+    - /helm
+    - /cube
+    - /cubehelm
+    - /bust
+    - /body
+    - /armor/bust
+    - /armour/bust
+    - /armor/body
+    - /armour/body
 
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
