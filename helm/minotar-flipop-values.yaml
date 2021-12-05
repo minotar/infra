@@ -1,8 +1,10 @@
 
 floatingIpPools:
+  # Primary source of inbound traffic from Cloudflare on HTTP/S (Firewalled)
   - name: k8-ip-pool
     provider: digitalocean
     region: nyc1
+    # 2 IPs "balances" inbound traffic
     desiredIps: 2
     dnsRecordSet:
       recordName: k8
@@ -13,3 +15,18 @@ floatingIpPools:
       nodeLabel: doks.digitalocean.com/node-pool=minotar-pool
       podLabel: app.kubernetes.io/name=ingress-nginx,app.kubernetes.io/component=controller
       podNamespace: nginx-ingress
+
+
+nodeDNSRecordSets:
+  # Ensures the external monitoring can use a single address for metric grabbing
+  - name: metrics-record-set
+    dnsRecordSet:
+      recordName: metrics
+      zone: cluster.minotar.net
+      ttl: 30
+      provider: digitalocean
+    match:
+      nodeLabel: doks.digitalocean.com/node-pool=minotar-pool
+      podLabel: app=prometheus,app.kubernetes.io/name=prometheus,prometheus=kube-prometheus-stack-prometheus
+      podNamespace: kube-prometheus-stack
+

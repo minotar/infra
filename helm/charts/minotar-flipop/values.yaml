@@ -47,6 +47,15 @@ floatingIpPools:
 #        - effect: NoSchedule
 #          key: node.kubernetes.io/unschedulable
 
+# Node DNS Records to create
+nodeDNSRecordSets:
+#    # Name of Node DNS Record Set
+#  - name: k8-dns-record
+#    # dnsRecordSet is the same as for floatingIpPools
+#    dnsRecordSet: {}
+#    # match is the same as for floatingIpPools
+#    match: {}
+
 resources:
   limits:
     cpu: 150m
