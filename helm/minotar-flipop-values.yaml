@@ -30,3 +30,7 @@ nodeDNSRecordSets:
       podLabel: app=prometheus,app.kubernetes.io/name=prometheus,prometheus=kube-prometheus-stack-prometheus
       podNamespace: kube-prometheus-stack
 
+podMonitor:
+  enabled: true
+  selector:
+    release: kube-prometheus-stack

@@ -70,8 +70,8 @@ containerPort: 8080
 # If not set, a name is generated using the fullname template
 serviceAccountName:
 
-serviceMonitor:
-  ## If true, a ServiceMonitor CRD is created for a prometheus operator
+podMonitor:
+  ## If true, a PodMonitor CRD is created for a prometheus operator
   ## https://github.com/coreos/prometheus-operator
   ##
   enabled: false
