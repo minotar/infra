@@ -29,7 +29,7 @@ ansible-deploy:
 	ansible-playbook -i ansible/hosts -e @ansible/custom-vars.yml ansible/playbook.yml
 
 ansible-check:
-	ansible-playbook -i ansible/hosts -e @ansible/custom-vars.yml ansible/playbook.yml
+	ansible-playbook -i ansible/hosts -e @ansible/custom-vars.yml ansible/playbook.yml --check
 
 
 ## helm / kube
