@@ -23,6 +23,7 @@ floatingIpPools:
 #    desiredIps: 2
 #    # ips can be ommitted and fresh floating IPs will be assinged (`desiredIps` defaults to 1)
 #    # If a list of IPs is given, these will be used first (`desiredIps` defualts to 0 - assign all listed IPs )
+#    # Hardcoding after assignment can help reduce them being lost/more being assigned upon change
 #    ips:
 #      - 192.168.1.1
 #      - 192.168.1.2
