@@ -33,7 +33,7 @@ cache:
   # Varnish storage backend type (https://varnish-cache.org/docs/trunk/users-guide/storage-backends.html)
   varnishStorage: file,/cache/varnish-cache # default,malloc,umem,file...
   # Varnish storage backend size
-  storageSize: 2G # K(ibibytes), M(ebibytes), G(ibibytes), T(ebibytes) ... unlimited
+  storageSize: 1G # K(ibibytes), M(ebibytes), G(ibibytes), T(ebibytes) ... unlimited
   # Varnish transient storage backend type (https://varnish-cache.org/docs/trunk/users-guide/storage-backends.html)
   varnishTransientStorage: malloc
   # Varnish transient storage backend size
@@ -60,11 +60,17 @@ exporter:
   enabled: true
   resources:
     limits:
-      memory: 25Mi
+      memory: 35Mi
     requests:
       cpu: 10m
       memory: 10Mi
-serviceMonitor: true
+
+# Requires https://github.com/mittwald/kube-httpcache/pull/113
+serviceMonitor:
+  enabled: true
+
+  additionalLabels:
+    release: kube-prometheus-stack
 
 service:
   type: ClusterIP
@@ -73,7 +79,7 @@ service:
 
 resources:
   limits:
-    memory: 1Gi
+    memory: 700Mi
   requests:
     cpu: 75m
     memory: 500Mi
