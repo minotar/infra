@@ -78,11 +78,18 @@
   template:
     src: prometheus.conf.j2
     dest: /etc/prometheus/prometheus.conf
+  tags:
+    - config
   notify:
     - restart prometheus
 
 - name: Create Unit file for prometheus
-  template: src=prometheus.service.j2 dest=/etc/systemd/system/prometheus.service mode=644
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    mode: 644
+  tags:
+    - config
   notify:
     - restart prometheus
 

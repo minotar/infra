@@ -34,6 +34,8 @@ prometheus_listen_address: localhost:9090
 prometheus_caddy_site: true
 # Replace the localhost:9090 caddy Reverse Proxy address
 prometheus_caddy_override_reverse:
+prometheus_query_timeout: 2m
+prometheus_query_concurrency: 20
 
 blackbox_exporter_service_name: blackbox_exporter
 blackbox_exporter_user_name: blackbox_exporter

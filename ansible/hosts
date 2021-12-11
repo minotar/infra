@@ -20,6 +20,9 @@ all:
     grafana_jwt_header: X-Pomerium-Jwt-Assertion
     grafana_jwt_jwks: "{{ pomerium_service_url }}/.well-known/pomerium/jwks.json"
 
+    prometheus_query_timeout: 20s
+    prometheus_query_concurrency: 5
+
     # Set Prometheus/Grafana hosts to point at Pomerium
     prometheus_caddy_override_reverse: localhost:8080
     grafana_caddy_override_reverse: localhost:8080

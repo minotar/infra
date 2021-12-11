@@ -8,11 +8,15 @@ User={{ prometheus_user_name }}
 Group={{ prometheus_group_name }}
 Restart=on-abnormal
 Type=simple
-ExecStart=/usr/local/bin/prometheus                                           \
-                         --config.file=/etc/prometheus/prometheus.conf        \
-                         --web.listen-address={{ prometheus_listen_address }} \
-                         --storage.tsdb.path=/data/prometheus                 \
-                         --storage.tsdb.retention.time=60d
+ExecStart=/usr/local/bin/prometheus                                                                            \
+                                                    --config.file=/etc/prometheus/prometheus.conf              \
+                                                    --web.listen-address={{ prometheus_listen_address }}       \
+{% if prometheus_query_timeout is defined %}        --query.timeout={{ prometheus_query_timeout }}             \
+{% endif %}
+{% if prometheus_query_concurrency is defined %}    --query.max-concurrency={{ prometheus_query_concurrency }} \
+{% endif %}
+                                                    --storage.tsdb.path=/data/prometheus                       \
+                                                    --storage.tsdb.retention.time=60d
 
 [Install]
 WantedBy=multi-user.target
