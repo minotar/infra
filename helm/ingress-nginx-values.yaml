@@ -205,7 +205,14 @@ controller:
       scrapeInterval: 30s
       # honorLabels: true
       #targetLabels: []
-      #metricRelabelings: []
+      metricRelabelings:
+        - sourceLabels: [ __name__ ]
+          regex: 'nginx_ingress_controller_bytes_sent_(bucket|sum)'
+          action: drop
+        - sourceLabels: [ __name__ ]
+          regex: 'nginx_ingress_controller_(request|response)_size_(bucket|sum)'
+          action: drop
+
 
     prometheusRule:
       enabled: false
