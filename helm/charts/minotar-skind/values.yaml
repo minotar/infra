@@ -8,7 +8,7 @@ mcclient:
 
 image:
   repository: minotar/skind
-  tag: version4-e605c9b
+  tag: version4-e40c6ce-WIP
   #pullPolicy: IfNotPresent
   pullPolicy: Always
 
