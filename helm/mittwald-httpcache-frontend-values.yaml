@@ -31,9 +31,9 @@ cache:
   # watching for backend changes is true by default
   backendWatch: true
   # Varnish storage backend type (https://varnish-cache.org/docs/trunk/users-guide/storage-backends.html)
-  varnishStorage: file,/cache/varnish-cache # default,malloc,umem,file...
+  varnishStorage: malloc # default,malloc,umem,file...
   # Varnish storage backend size
-  storageSize: 1G # K(ibibytes), M(ebibytes), G(ibibytes), T(ebibytes) ... unlimited
+  storageSize: 200M # K(ibibytes), M(ebibytes), G(ibibytes), T(ebibytes) ... unlimited
   # Varnish transient storage backend type (https://varnish-cache.org/docs/trunk/users-guide/storage-backends.html)
   varnishTransientStorage: malloc
   # Varnish transient storage backend size
@@ -60,7 +60,7 @@ exporter:
   enabled: true
   resources:
     limits:
-      memory: 35Mi
+      memory: 50Mi
     requests:
       cpu: 10m
       memory: 10Mi
