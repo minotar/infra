@@ -1,4 +1,8 @@
 
+
+IMAGE_PREFIX ?= minotar
+
+
 ## Docs
 .PHONY: plantuml-jetty-start plantuml-jetty-stop
 
@@ -30,6 +34,16 @@ ansible-deploy:
 
 ansible-check:
 	ansible-playbook -i ansible/hosts -e @ansible/custom-vars.yml ansible/playbook.yml --check
+
+
+## dockerfiles
+.PHONY: varnish-exporter-image varnish-exporter-image-push
+
+varnish-exporter-image:
+	docker build -t $(IMAGE_PREFIX)/varnish_exporter:latest -f dockerfiles/varnish_exporter.Dockerfile .
+
+varnish-exporter-image-push:
+	docker push $(IMAGE_PREFIX)/varnish_exporter:latest
 
 
 ## helm / kube
