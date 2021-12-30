@@ -13,7 +13,16 @@ controller:
     https: 443
 
   # Will add custom configuration options to Nginx https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
-  config: {}
+  config:
+    http-snippet: |
+      proxy_cache_path /tmp/skind-cache levels=1:2:2 keys_zone=skind-cache:16m max_size=15g min_free=10g inactive=24h;
+      # Set a higher min_free for processd cache as it's less valuable
+      proxy_cache_path /tmp/processd-cache levels=1:2:2 keys_zone=processd-cache:16m max_size=5g min_free=15g inactive=24h;
+
+      map $http_x_backend $x_backend {
+        default   "$http_x_backend, $hostname";
+        ""        $hostname;
+      }
 
   # Will add custom headers before sending traffic to backends according to https://github.com/kubernetes/ingress-nginx/tree/main/docs/examples/customization/custom-headers
   proxySetHeaders: {}
