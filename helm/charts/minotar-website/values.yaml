@@ -14,7 +14,7 @@ strategy:
 
 image:
   repository: minotar/minotar.net
-  tag: version4-31e64d7
+  tag: master-0e69951
   #pullPolicy: IfNotPresent
   pullPolicy: Always
 
