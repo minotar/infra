@@ -1,0 +1,98 @@
+@startuml
+title skind Caching/Request Strategy
+
+|Cloudflare|
+start
+
+:Incoming request from eyeball
+//minotar.net//;
+
+' :Workers (?);
+
+:Cloudflare Origin
+//ingress.cluster.minotar.net//;
+
+|Routing|
+
+:2 Floating IPs
+flipop assigns to Ready nodes;
+
+
+:ingress-nginx (Ingress Controller)
+DaemonSet containers with hostPort 80/443;
+
+' :Envoy/Contour/Other Routes;
+
+#palegreen:**minotar-spreader** Ingress
+//minotar.net//;
+note right
+    Not all nodes will have a floating
+    IP, thus traffic is imbalanced.
+    This Ingress rebalances traffic
+    based on //$uri// hash, ready
+    for efficient caching
+end note
+
+://minotar.net.local//;
+note right
+    Internal requests for skins
+    route back here
+end note
+
+split
+    #palegreen:**frontend-website** Ingress;
+    :minotar.net static site container;
+    detach
+split again
+    #palegreen:**skind** Ingress
+    Routes ///skin// and ///download//;
+    note right
+        Caches successful responses for 1d
+    end note
+    :skind ClusterIP Service;
+split again
+    #palegreen:**processd** Ingress
+    Routes ///avatar//, ///helm//, etc.;
+    note right
+        Caches successful responses for 1d
+    end note
+    :processd
+    //skin fetching routes back via skind Ingress//;
+    detach
+end split
+
+:skind Endpoint;
+
+' |Web Cache|
+
+' :Varnish/Nginx/Other performs caching;
+' :If Username lookup, perform ESI;
+' :ESI for Texture?;
+
+' |processd|
+
+' :Lookup to skind;
+' :Peform ESI to get texture;
+
+|skind|
+
+:Lookup in Username->UUID cache;
+:Redirect to UUID;
+
+:Lookup UserData for UUID;
+:Redirect to Texture URL;
+
+|processd|
+:Follow texture URL;
+
+:Process texture;
+
+|Routing|
+:cache response in ingress-nginx;
+
+|Cloudflare|
+:return to eyeballs;
+
+stop
+@enduml
+

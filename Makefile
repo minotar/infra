@@ -36,16 +36,6 @@ ansible-check:
 	ansible-playbook -i ansible/hosts -e @ansible/custom-vars.yml ansible/playbook.yml --check
 
 
-## dockerfiles
-.PHONY: varnish-exporter-image varnish-exporter-image-push
-
-varnish-exporter-image:
-	docker build -t $(IMAGE_PREFIX)/varnish_exporter:latest -f dockerfiles/varnish_exporter.Dockerfile .
-
-varnish-exporter-image-push:
-	docker push $(IMAGE_PREFIX)/varnish_exporter:latest
-
-
 ## helm / kube
 .PHONY: helm-repos k8-namespaces k8-top
 
@@ -111,14 +101,6 @@ helm-processd-install:
 	helm install processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
 helm-processd-upgrade:
 	helm upgrade processd helm/charts/minotar-processd --namespace imgd --values helm/minotar-processd-values.yaml
-
-#### Frontend Varnish
-.PHONY: helm-varnish-install helm-varnish-upgrade
-
-helm-varnish-install:
-	helm upgrade frontend-varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-frontend-values.yaml
-helm-varnish-upgrade:
-	helm upgrade frontend-varnish helm/charts/mittwald-httpcache/chart --namespace imgd --values helm/mittwald-httpcache-frontend-values.yaml
 
 #### Website
 .PHONY: helm-website-install helm-website-upgrade

@@ -1,3 +1,11 @@
+# Minotar Infra
+
+* Caching by Cloudflare
+* Kubernetes on DigitalOcean
+* Caching by Nginx
+* Golang backend
+
+<img src="./docs/Prod.png" width="600">
 
 ## Prerequisites
 

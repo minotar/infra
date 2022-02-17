@@ -1,6 +1,6 @@
 
 
-skindURL: http://frontend-varnish-httpcache/skin/
+skindURL: http://ingress-ingress-nginx-controller.nginx-ingress/skin/
 
 pspEnabled: false
 
@@ -8,14 +8,44 @@ pspEnabled: false
 ingress:
   enabled: true
   className: nginx
-  host: minotar.net
-  serviceName: frontend-varnish-httpcache
-  servicePort: 80
+  host: minotar.net.local
+  #serviceName: frontend-varnish-httpcache
+  #servicePort: 80
+  annotations:
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$uri"
+    nginx.ingress.kubernetes.io/upstream-vhost: "minotar.net"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      server_name ingress-ingress-nginx-controller.nginx-ingress;
+      if ( $request_method !~ ^(GET|HEAD)$ ) {
+        return 405;
+      }
+
+      error_page 405 @error405;
+      location @error405 {
+        add_header Allow "GET, HEAD" always;
+      }
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_cache processd-cache;
+      # Ideally, we would be lowercasing this here
+      proxy_cache_key $uri;
+      proxy_cache_lock on;
+      proxy_cache_valid   200 302 307  1d;
+      proxy_cache_valid   404          30m;
+      proxy_cache_use_stale error
+          timeout invalid_header http_500
+          http_502 http_503 http_504 http_403;
+
+      #proxy_set_header X-Backend $x_backend;
+      add_header X-Backend $x_backend;
+
+      add_header X-Cache-Status $upstream_cache_status;
+      add_header X-Req-Url $uri;
 
 resources:
   limits:
     cpu: 200m
-    memory: 100Mi
+    memory: 120Mi
 
 serviceMonitor:
   enabled: true

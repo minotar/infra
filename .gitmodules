@@ -1,3 +1,0 @@
-[submodule "helm/charts/mittwald-httpcache"]
-	path = helm/charts/mittwald-httpcache
-	url = https://github.com/mittwald/kube-httpcache

@@ -67,7 +67,7 @@ spec:
           - --cache.uuid.badger-path=/skind-badger/badger_cache_uuid/
 
           - --cache.userdata.backend=badger
-          - --cache.userdata.badger-path=/skind-badger/badger_cache_userdata/
+          - --cache.userdata.badger-path=/skind-badger/badger_cache_userdata2/
 
           - --cache.textures.backend=none
 

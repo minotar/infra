@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minotar-spreader
+  namespace: nginx-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$uri"
+    nginx.ingress.kubernetes.io/upstream-vhost: "minotar.net.local"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      if ( $request_method !~ ^(GET|HEAD)$ ) {
+        return 405;
+      }
+
+      error_page 405 @error405;
+      location @error405 {
+        add_header Allow "GET, HEAD" always;
+      }
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Backend $x_backend;
+
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: minotar.net
+    http:
+      paths:
+      - backend:
+          service:
+            name: ingress-ingress-nginx-controller
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+
