@@ -4,7 +4,7 @@ skindURL: https://minotar.net/skin/
 
 image:
   repository: minotar/processd
-  tag: version4-e605c9b
+  tag: master-939a787
   #pullPolicy: IfNotPresent
   pullPolicy: Always
 
