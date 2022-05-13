@@ -7,7 +7,7 @@ mcclient:
 
 image:
   repository: minotar/imgd
-  tag: master-939a787
+  tag: 4.0.0
   #pullPolicy: IfNotPresent
   pullPolicy: Always
 
