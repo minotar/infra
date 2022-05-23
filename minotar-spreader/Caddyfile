@@ -1,0 +1,75 @@
+{
+    debug
+    http_port 2020
+    log
+}
+
+(limit_methods) {
+    @unaccepted_methods {
+        not {
+            method GET HEAD
+        }
+    }
+    error @unaccepted_methods "Method Not Allowed" 405
+    handle_errors {
+        @405 expression {http.error.status_code} == 405
+        header @405 Allow "GET, HEAD"
+    }
+}
+
+(sanitize_request) {
+    # Remove double slashes
+    uri path_regexp /{2,} /
+
+    # Remove query string
+    @has_query expression {query} != ""
+    rewrite @has_query {path}?
+}
+
+(route_match) {
+    @processd_paths {
+        path /avatar/*
+        path /helm/*
+        path /cube/*
+        path /cubehelm/*
+        path /bust/*
+        path /body/*
+        path /armor/bust/*
+        path /armour/bust/*
+        path /armor/body/*
+        path /armour/body/*
+    }
+
+    @skind_paths {
+        path /skin/*
+        path /download/*
+    }
+}
+
+(get_user) {
+    map @processd_paths {path} {user} {
+        ~/(avatar|helm|cube|cubehelm|bust|body)/([a-zA-Z0-9_]{1,16}) "${2}"
+        ~/(armo(u)?r/)?(bust|body)/([a-zA-Z0-9_]{1,16}) "${3}"
+        default "asdasd"
+    }
+
+    request_header X-User-Hash {user}
+}
+
+http://minotar.net {
+    import limit_methods
+    import sanitize_request
+
+    import route_match
+    import get_user
+
+	respond "Hello {user}. {http.request.uri}
+"
+
+
+
+}
+
+http://www.minotar.net {
+	redir https://www.minotar.net{uri}
+}
