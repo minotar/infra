@@ -26,48 +26,124 @@
     rewrite @has_query {path}?
 }
 
-(route_match) {
-    @processd_paths {
-        path /avatar/*
-        path /helm/*
-        path /cube/*
-        path /cubehelm/*
-        path /bust/*
-        path /body/*
-        path /armor/bust/*
-        path /armour/bust/*
-        path /armor/body/*
-        path /armour/body/*
+(default_path) {
+    uri strip_prefix /{vars.route_path}
+    redir @dashed_uuid /{vars.route_path}/{re.dashed.1}{re.dashed.2}{re.dashed.3}{re.dashed.4}{re.dashed.5}{re.dashed.6} 301
+}
+
+(normalize_params) {
+    map {re.re_u.width} {width} {
+        # Default size
+        "" "180"
+        ~(.*) "${1}"
+    }
+    map {re.re_u.ext} {ext} {
+        # Default extension
+        "" ".png"
+        ~(.*) "${1}"
     }
 
-    @skind_paths {
-        path /skin/*
-        path /download/*
+    request_header X-User-Hash {vars.user}
+}
+
+(proxy_request) {
+    rewrite * {vars.new_path}
+    respond "Heyo {vars.user}: {http.request.uri}"
+}
+
+(match_processd_user_route) {
+    route /{args.0}/* {
+        vars route_path {args.0}
+        import default_path
+        handle @processd_uuid {
+            vars {
+                user  {re.re_u.uuid}
+            }
+            import normalize_params
+            vars new_path "/{vars.route_path}/{vars.user}/{width}{ext}"
+            import proxy_request
+        }
+        handle @processd_username {
+            vars {
+                user  {re.re_u.username}
+            }
+            import normalize_params
+            vars new_path "/{vars.route_path}/{vars.user}/{width}{ext}"
+            import proxy_request
+        }
+        error * "Invalid Path" 403
     }
 }
 
-(get_user) {
-    map @processd_paths {path} {user} {
-        ~/(avatar|helm|cube|cubehelm|bust|body)/([a-zA-Z0-9_]{1,16}) "${2}"
-        ~/(armo(u)?r/)?(bust|body)/([a-zA-Z0-9_]{1,16}) "${3}"
-        default "asdasd"
+(match_skind_user_route) {
+    route /{args.0}/* {
+        vars route_path {args.0}
+        import default_path
+        handle @skind_uuid {
+            vars {
+                user  {re.re_u.uuid}
+            }
+            import normalize_params
+            vars new_path "/{vars.route_path}/{vars.user}{ext}"
+            import proxy_request
+        }
+        handle @skind_username {
+            vars {
+                user  {re.re_u.username}
+            }
+            import normalize_params
+            vars new_path "/{vars.route_path}/{vars.user}{ext}"
+            import proxy_request
+        }
+        error * "Invalid Path" 403
+    }
+}
+
+(load_routes) {
+    @dashed_uuid {
+        # Covers /XXXX.XXX (4 digit width and extension)
+        path_regexp dashed ^/([0-9a-f]{8})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{12})(.{0,9})$
+    }
+    @processd_uuid {
+        path_regexp re_u ^/(?P<uuid>[0-9a-f]{32})(/?(?P<width>[0-9]{1,4}))?(?P<ext>\.png|\.svg)?$
+    }
+    @processd_username {
+        path_regexp re_u ^/(?P<username>[a-zA-Z0-9_]{1,16})(/?(?P<width>[0-9]{1,4}))?(?P<ext>\.png|\.svg)?$
+    }
+    @skind_uuid {
+        path_regexp re_u ^/(?P<uuid>[0-9a-f]{32})(?P<ext>\.png)?$
+    }
+    @skind_username {
+        path_regexp re_u ^/(?P<username>[a-zA-Z0-9_]{1,16})(?P<ext>\.png)?$
     }
 
-    request_header X-User-Hash {user}
+    import match_processd_user_route "avatar"
+    import match_processd_user_route "helm"
+    import match_processd_user_route "cube"
+    import match_processd_user_route "cubehelm"
+    import match_processd_user_route "bust"
+    import match_processd_user_route "body"
+    import match_processd_user_route "armor/bust"
+    import match_processd_user_route "armour/bust"
+    import match_processd_user_route "armor/body"
+    import match_processd_user_route "armour/body"
+
+    import match_skind_user_route "skin"
+    import match_skind_user_route "download"
 }
+
+
 
 http://minotar.net {
     import limit_methods
     import sanitize_request
 
-    import route_match
-    import get_user
+    request_header X-Backend {system.hostname}
 
-	respond "Hello {user}. {http.request.uri}
+    import load_routes
+
+	respond "This ain't good {user}. {http.request.uri}
 "
-
-
-
 }
 
 http://www.minotar.net {
