@@ -29,11 +29,12 @@ metadata:
     helm.sh/chart: {{ include "minotar-flipop.chart" . }}
   name: {{ template "minotar-flipop.fullname" . }}
 rules:
-- apiGroups: [""]
-  resources: ["configmaps", "configmaps/status"]
-  verbs: ["get", "list", "watch", "update", "create", "patch", "delete"]
-- apiGroups: [""]
-  resources: ["configmaps/status"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["create"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  resourceNames: ["floating-ip-pool-controller-leader-election"]
   verbs: ["get", "update", "patch"]
 
 ---

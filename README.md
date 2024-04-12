@@ -68,7 +68,7 @@ Create the token which will be used to assign the floating IPs to the nodes.
 kubectl -n flipop create secret generic flipop-provider-tokens --from-literal=DIGITALOCEAN_ACCESS_TOKEN="${DIGITALOCEAN_ACCESS_TOKEN}"
 ```
 
-Installed with `make helm-flipop-install` and upgraded with `helm-flipop-upgrade`
+Installed with `make helm-flipop-install` and upgraded with `make helm-flipop-upgrade`
 
 ### Ingress
 

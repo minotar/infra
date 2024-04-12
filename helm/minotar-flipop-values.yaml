@@ -1,4 +1,10 @@
 
+image:
+  # Pin version to avoid updates 🙃
+  repository: digitaloceanapps/flipop@sha256
+  tag: b67bbce53bc3d6433334cdc323dec15e427809ec9877caebb8b8b38cdf6b32ff
+  pullPolicy: IfNotPresent
+
 floatingIpPools:
   # Primary source of inbound traffic from Cloudflare on HTTP/S (Firewalled)
   - name: ingress-ip-pool
